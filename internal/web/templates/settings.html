@@ -5,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/fa.min.css">
     <link rel="stylesheet" href="/style.css">
-    <script>
-        (function() {
-            const theme = localStorage.getItem('theme') || 'system';
-            if (theme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else if (theme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        })();
-    </script>
+    <script src="./theme.js" defer></script>
     <title>ExpenseOwl Settings</title>
 </head>
 <body>
@@ -877,7 +868,6 @@
         document.getElementById('saveCurrency').addEventListener('click', saveCurrency);
         document.getElementById('saveStartDate').addEventListener('click', saveStartDate);
         document.getElementById('csv-import-file').addEventListener('change', handleCsvImport);
-        document.getElementById('csv-import-file-old').addEventListener('change', handleCsvImportOld);
         document.getElementById('newCategory').addEventListener('keypress', e => e.key === 'Enter' && addCategory());
 
         document.getElementById('recurringExpenseForm').addEventListener('submit', async (e) => {

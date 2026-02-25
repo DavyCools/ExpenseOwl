@@ -98,6 +98,93 @@ func (h *Handler) UpdateCategories(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "success"})
 }
 
+func (h *Handler) RenameCategory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		writeJSON(w, http.StatusMethodNotAllowed, ErrorResponse{Error: "Method not allowed"})
+		return
+	}
+	var payload struct {
+		oldName string `json:"oldName"`
+		newName string `json:"newName"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Invalid request body"})
+		return
+	}
+
+	newName, err := storage.ValidateCategory(payload.newName)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: fmt.Sprintf("Invalid new category name: %v", err)})
+		return
+	}
+
+	categories, err := h.storage.GetCategories()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to get categories"})
+		log.Printf("API ERROR: Failed to get categories: %v\n", err)
+		return
+	}
+
+	if !slices.Contains(categories, payload.oldName) {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Old category does not exist"})
+		return
+	}
+
+	if payload.oldName != newName && slices.Contains(categories, newName) {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "New category name already exists"})
+		return
+	}
+
+	if i := slices.Index(categories, payload.oldName); i != -1 {
+    	categories[i] = newName
+	}
+
+	expenses, err := h.storage.GetAllExpenses()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to get expenses"})
+		log.Printf("API ERROR: Failed to get expenses: %v\n", err)
+		return
+	}
+
+	for i := range expenses {
+		if expenses[i].Category == payload.oldName {
+			expenses[i].Category = newName
+			if err := h.storage.UpdateExpense(expenses[i].ID, expenses[i]); err != nil {
+				writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to update expense"})
+				log.Printf("API ERROR: Failed to update expense %s: %v\n", expenses[i].ID, err)
+				return
+			}
+		}
+	}
+
+
+	recurringExpenses, err := h.storage.GetRecurringExpenses()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to get recurring expenses"})
+		log.Printf("API ERROR: Failed to get recurring expenses: %v\n", err)
+		return
+	}
+
+	for i := range recurringExpenses {
+		if recurringExpenses[i].Category == payload.OldName {
+			recurringExpenses[i].Category = newName
+			if err := h.storage.UpdateRecurringExpense(recurringExpenses[i].ID, recurringExpenses[i], false); err != nil {
+				writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to update recurring expense"})
+				log.Printf("API ERROR: Failed to update recurring expense %s: %v\n", recurringExpenses[i].ID, err)
+				return
+			}
+		}
+	}
+
+	if err := h.storage.UpdateCategories(categories); err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to update categories"})
+		log.Printf("API ERROR: Failed to update categories: %v\n", err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"status": "success"})
+}
+
 func (h *Handler) GetCurrency(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusMethodNotAllowed, ErrorResponse{Error: "Method not allowed"})

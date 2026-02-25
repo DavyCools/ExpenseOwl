@@ -108,5 +108,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            DavyCools/expenseowl:main
-            DavyCools/expenseowl:${{ needs.create-release.outputs.version }}
+            davy123/expenseowl:main
+            davy123/expenseowl:${{ needs.create-release.outputs.version }}

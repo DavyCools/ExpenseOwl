@@ -5,7 +5,7 @@
 <h1 align="center">ExpenseOwl</h1><br>
 
 <p align="center">
-<a href="https://github.com/DavyCools/expenseowl/actions/workflows/release.yml"><img src="https://github.com/DavyCools/expenseowl/actions/workflows/release.yml/badge.svg" alt="Release"></a>&nbsp;<a href="https://github.com/DavyCools/expenseowl/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/DavyCools/expenseowl"></a>&nbsp;<a href="https://hub.docker.com/r/DavyCools/expenseowl"><img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/DavyCools/expenseowl"></a>
+<a href="https://github.com/davycools/expenseowl/actions/workflows/release.yml"><img src="https://github.com/davycools/expenseowl/actions/workflows/release.yml/badge.svg" alt="Release"></a>&nbsp;<a href="https://github.com/DavyCools/expenseowl/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/davycools/expenseowl"></a>&nbsp;<a href="https://hub.docker.com/r/davy123/expenseowl"><img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/davy123/expenseowl"></a>
 </p>
 
 <p align="center">
@@ -93,7 +93,7 @@ docker run --rm -d \
   --name expenseowl \
   -p 8080:8080 \
   -v expenseowl:/app/data \
-  DavyCools/expenseowl:main
+  davy123/expenseowl:main
 ```
 
 To use Docker compose, use this YAML definition:
@@ -101,7 +101,7 @@ To use Docker compose, use this YAML definition:
 ```yaml
 services:
   expenseowl:
-    image: DavyCools/expenseowl:main
+    image: davy123/expenseowl:main
     restart: unless-stopped
     ports:
       - 5006:8080 # change 5006 to what you want to expose on

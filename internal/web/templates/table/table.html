@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/fa.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'system';
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <title>ExpenseOwl Table</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="nav-bar">
+                <a href="/">
+                    <img src="/pwa/icon-192.png" alt="ExpenseOwl Logo" height="85" style="vertical-align: middle; margin-right: 20px;">
+                </a>
+                <a href="/" class="view-button" data-tooltip="Dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </a>
+                <a href="/table" class="view-button active" data-tooltip="Table View">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+                <a href="/settings" class="view-button" data-tooltip="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+        </header>
+
+        <div class="time-range-wrapper">
+            <div class="table-controls">
+                <input type="radio" id="showMonthToggle" name="timeRange" value="month" checked>
+                <label for="showMonthToggle">Monthly Transactions</label><br>
+
+                <input type="radio" id="showYearToggle" name="timeRange" value="year">
+                <label for="showYearToggle">Yearly Transactions</label><br>
+
+                <input type="radio" id="showAllToggle" name="timeRange" value="all">
+                <label for="showAllToggle">All Transactions</label> 
+            </div>
+        </div>
+
+        <div class="expense-navigation" id="month-navigation">
+            <button id="prevMonth" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="current-date" id="currentMonth"></div>
+            <button id="nextMonth" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <div class="expense-navigation" id="year-navigation">
+            <button id="prevYear" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="current-date" id="currentYear"></div>
+            <button id="nextYear" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <div class="form-container">
+            <form id="expenseForm" class="expense-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" value="-" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="">categories</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tags-input">Tags</label>
+                    <div id="tags-input-container" class="tags-input-container">
+                        <div id="selected-tags" class="selected-tags"></div>
+                        <input type="text" id="tags-input" placeholder="(optional)">
+                    </div>
+                    <div id="tags-dropdown" class="tags-dropdown"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <input type="number" id="amount" step="0.01" min="0.01" max="9000000000000000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" required>
+                    <script>
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
+                        document.getElementById('date').value = formattedDate;
+                    </script>
+                </div>
+                
+                <div class="form-group form-group-checkbox">
+                    <label for="reportGain">Report Gain</label>
+                    <input type="checkbox" id="reportGain" class="styled-checkbox">
+                </div>
+
+                <button type="submit" class="nav-button">Add Expense</button>
+            </form>
+            <div id="formMessage" class="form-message"></div>
+        </div>
+
+        <div id="tableContainer">
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Delete Expense</h3>
+            <p>Are you sure you want to delete this expense? (cannot be undone)</p>
+            <div class="modal-buttons">
+                <button class="modal-button" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-button confirm" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/functions.js"></script>
+    <script src="/table.js"></script>
+</body>
+</html>

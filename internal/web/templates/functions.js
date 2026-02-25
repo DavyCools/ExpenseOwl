@@ -81,13 +81,10 @@ function getISODateWithLocalTime(dateInput) {
 
 function formatDateFromUTC(utcDateString) {
     const date = new Date(utcDateString);
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
+    return date.toLocaleDateString('nl-BE', {
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZoneName: 'short'
     });
 }
 

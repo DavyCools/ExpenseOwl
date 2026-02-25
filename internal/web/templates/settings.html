@@ -832,8 +832,10 @@
                 createTagInput('tags-input', 'selected-tags', 'tags-dropdown', addFormSelectedTags);
                 fetch('/version').then(r => r.ok ? r.text() : 'dev').then(version => {
                     const link = document.getElementById('version-link');
-                    link.textContent = version;
-                    if (version !== 'dev') link.href = `https://github.com/DavyCools/expenseowl/releases/tag/${version}`;
+                    if (link !== null) {
+                        link.textContent = version;
+                        if (version !== 'dev') link.href = `https://github.com/DavyCools/expenseowl/releases/tag/${version}`;
+                    }
                 }).catch(e => console.error('Failed to fetch version:', e));
 
             } catch (error) {

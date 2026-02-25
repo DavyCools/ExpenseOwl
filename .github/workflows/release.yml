@@ -99,7 +99,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: tanq16
+          username: DavyCools
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -108,5 +108,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            tanq16/expenseowl:main
-            tanq16/expenseowl:${{ needs.create-release.outputs.version }}
+            DavyCools/expenseowl:main
+            DavyCools/expenseowl:${{ needs.create-release.outputs.version }}

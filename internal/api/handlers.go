@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tanq16/expenseowl/internal/storage"
-	"github.com/tanq16/expenseowl/internal/web"
+	"github.com/DavyCools/expenseowl/internal/storage"
+	"github.com/DavyCools/expenseowl/internal/web"
 )
 
 // Handler holds the storage interface

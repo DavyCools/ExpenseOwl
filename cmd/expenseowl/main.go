@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/tanq16/expenseowl/internal/api"
-	"github.com/tanq16/expenseowl/internal/storage"
-	"github.com/tanq16/expenseowl/internal/web"
+	"github.com/DavyCools/expenseowl/internal/api"
+	"github.com/DavyCools/expenseowl/internal/storage"
+	"github.com/DavyCools/expenseowl/internal/web"
 )
 
 var version = "dev"

@@ -5,7 +5,7 @@
 <h1 align="center">ExpenseOwl</h1><br>
 
 <p align="center">
-<a href="https://github.com/tanq16/expenseowl/actions/workflows/release.yml"><img src="https://github.com/tanq16/expenseowl/actions/workflows/release.yml/badge.svg" alt="Release"></a>&nbsp;<a href="https://github.com/Tanq16/expenseowl/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/tanq16/expenseowl"></a>&nbsp;<a href="https://hub.docker.com/r/tanq16/expenseowl"><img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/tanq16/expenseowl"></a>
+<a href="https://github.com/DavyCools/expenseowl/actions/workflows/release.yml"><img src="https://github.com/DavyCools/expenseowl/actions/workflows/release.yml/badge.svg" alt="Release"></a>&nbsp;<a href="https://github.com/DavyCools/expenseowl/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/DavyCools/expenseowl"></a>&nbsp;<a href="https://hub.docker.com/r/DavyCools/expenseowl"><img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/DavyCools/expenseowl"></a>
 </p>
 
 <p align="center">
@@ -93,7 +93,7 @@ docker run --rm -d \
   --name expenseowl \
   -p 8080:8080 \
   -v expenseowl:/app/data \
-  tanq16/expenseowl:main
+  DavyCools/expenseowl:main
 ```
 
 To use Docker compose, use this YAML definition:
@@ -101,7 +101,7 @@ To use Docker compose, use this YAML definition:
 ```yaml
 services:
   expenseowl:
-    image: tanq16/expenseowl:main
+    image: DavyCools/expenseowl:main
     restart: unless-stopped
     ports:
       - 5006:8080 # change 5006 to what you want to expose on
@@ -119,7 +119,7 @@ Download the appropriate binary from the project releases. The binary automatica
 To build the binary yourself:
 
 ```bash
-git clone https://github.com/tanq16/expenseowl.git && \
+git clone https://github.com/DavyCools/expenseowl.git && \
 cd expenseowl && \
 go build ./cmd/expenseowl
 ```

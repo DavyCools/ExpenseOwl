@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: expenseowl
-        image: tanq16/expenseowl:main
+        image: DavyCools/expenseowl:main
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

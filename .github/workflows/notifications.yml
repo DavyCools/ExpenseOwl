@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify on Issue or Comment
-        if: github.actor != 'Tanq16'
+        if: github.actor != 'DavyCools'
         run: |
           curl -H "Content-Type: application/json" -X POST \
           -d "{\"content\": \"*New issue/comment from **${{ github.actor }}***\n${{ github.event.issue.html_url }}\"}" ${{ secrets.DISCORD_WEBHOOK }}
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify on PR related activities
-        if: github.actor != 'Tanq16'
+        if: github.actor != 'DavyCools'
         run: |
           curl -H "Content-Type: application/json" -X POST \
           -d "{\"content\": \"*New PR activity from **${{ github.actor }}***\n${{ github.event.pull_request.html_url }}\"}" ${{ secrets.DISCORD_WEBHOOK }}

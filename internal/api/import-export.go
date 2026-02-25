@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tanq16/expenseowl/internal/storage"
+	"github.com/DavyCools/expenseowl/internal/storage"
 )
 
 // exports all expenses to CSV

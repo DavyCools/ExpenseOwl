@@ -36,16 +36,29 @@
             </div>
         </header>
 
-        <div class="month-navigation">
+        <div class="time-range-wrapper">
+            <div class="table-controls">
+                <input type="radio" id="showMonthToggle" name="timeRange" value="month" checked>
+                <label for="showMonthToggle">Monthly Transactions</label><br>
+
+                <input type="radio" id="showYearToggle" name="timeRange" value="year">
+                <label for="showYearToggle">Yearly Transactions</label><br>
+
+                <input type="radio" id="showAllToggle" name="timeRange" value="all">
+                <label for="showAllToggle">All Transactions</label> 
+            </div>
+        </div>
+
+        <div class="expense-navigation" id="month-navigation">
             <button id="prevMonth" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
-            <div class="current-month" id="currentMonth"></div>
+            <div class="current-date" id="currentMonth"></div>
             <button id="nextMonth" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
         </div>
-        
-        <div class="table-controls">
-            <label for="showAllToggle">
-                <input type="checkbox" id="showAllToggle" class="styled-checkbox"> Show All Transactions
-            </label>
+
+        <div class="expense-navigation" id="year-navigation">
+            <button id="prevYear" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="current-date" id="currentYear"></div>
+            <button id="nextYear" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
         </div>
 
         <div class="form-container">
@@ -128,7 +141,7 @@
             if (!expenses || expenses.length === 0) {
                 const message = document.getElementById('showAllToggle').checked ? 
                                 'No transactions found' : 
-                                'No expenses recorded for this month';
+                                'No expenses recorded for this ' + timeRangeSelected;
                 return `<div class="no-data">${message}</div>`;
             }
             const hasTags = expenses.some(exp => exp.tags && exp.tags.length > 0);
@@ -169,11 +182,30 @@
 
         function updateTable() {
             const showAll = document.getElementById('showAllToggle').checked;
-            document.querySelector('.month-navigation').style.display = showAll ? 'none' : 'flex';
+            document.querySelectorAll('.expense-navigation').forEach(el => {
+                el.style.display = showAll ? 'none' : 'flex';
+            });
 
-            expensesForTable = showAll
-                ? allExpenses.slice().sort((a, b) => new Date(b.date) - new Date(a.date))
-                : getMonthExpenses(allExpenses);
+            if (timeRangeSelected !== 'all' ) {
+                if (timeRangeSelected === 'month') {
+                    document.getElementById('month-navigation').style.display = 'flex';
+                    document.getElementById('year-navigation').style.display = 'none';
+                    // Get year from currentMonth display and set it to currentDate to ensure correct filtering when navigating months
+                    const monthYear = parseInt(document.getElementById('currentMonth').innerText.split(' ')[1]);
+                    currentDate.setFullYear(monthYear);
+                }
+                else {
+                    document.getElementById('month-navigation').style.display = 'none';
+                    document.getElementById('year-navigation').style.display = 'flex';
+                    // Get year from currentYear display and set it to currentDate to ensure correct filtering when navigating years
+                    const year = parseInt(document.getElementById('currentYear').innerText);
+                    currentDate.setFullYear(year);
+                }
+
+                expensesForTable = getExpenses(allExpenses, timeRangeSelected);
+            } else {
+                expensesForTable = allExpenses.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
             
             const tableContainer = document.getElementById('tableContainer');
             tableContainer.innerHTML = createTable(expensesForTable);
@@ -327,6 +359,7 @@
                 });
 
                 updateMonthDisplay();
+                updateYearDisplay();
                 updateTable();
                 setupTagInput();
             } catch (error) {
@@ -336,7 +369,16 @@
             }
         }
 
-        document.getElementById('showAllToggle').addEventListener('change', updateTable);
+        let timeRangeSelected = 'month';
+        document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    timeRangeSelected = this.value;
+                    updateTable();
+                }
+            });
+        });
+
 
         document.getElementById('prevMonth').addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
@@ -347,6 +389,18 @@
         document.getElementById('nextMonth').addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() + 1);
             updateMonthDisplay();
+            updateTable();
+        });
+
+        document.getElementById('prevYear').addEventListener('click', () => {
+            currentDate.setFullYear(currentDate.getFullYear() - 1);
+            updateYearDisplay();
+            updateTable();
+        });
+
+        document.getElementById('nextYear').addEventListener('click', () => {
+            currentDate.setFullYear(currentDate.getFullYear() + 1);
+            updateYearDisplay();
             updateTable();
         });
 

@@ -98,6 +98,13 @@ function updateMonthDisplay() {
     }
 }
 
+function updateYearDisplay() {
+    const currentYearEl = document.getElementById('currentYear');
+    if (currentYearEl) {
+        currentYearEl.textContent = currentDate.getFullYear();
+    }
+}
+
 function getMonthBounds(date) {
     const localDate = new Date(date);
     if (startDate === 1) {
@@ -132,8 +139,20 @@ function getMonthBounds(date) {
     }
 }
 
-function getMonthExpenses(expenses) {
-    const { start, end } = getMonthBounds(currentDate);
+function getExpenses(expenses, timeRange = 'month') {
+    let start, end;
+    if (timeRange === 'month') {
+         ({ start, end } = getMonthBounds(currentDate));
+    } else if (timeRange === 'year') {
+        const yearStart = new Date(currentDate.getFullYear(), 0, 1);
+        const yearEnd = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59, 999);
+        start = new Date(yearStart.toISOString());
+        end = new Date(yearEnd.toISOString());
+    }
+    else {
+        return expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
     return expenses.filter(exp => {
         const expDate = new Date(exp.date);
         return expDate >= start && expDate <= end;

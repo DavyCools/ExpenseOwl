@@ -5,7 +5,7 @@
     --text-primary: #f4f4f4;
     --text-secondary: #b3b3b3;
     --border: #1a365d;
-    --accent: #69afde;
+    --accent: #2d678e;
 }
 
 /* Light theme override */
@@ -57,7 +57,7 @@ header {
     border-bottom: 1px solid var(--border);
 }
 
-.month-navigation {
+.expense-navigation {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,7 +104,7 @@ header {
     cursor: not-allowed;
 }
 
-.current-month {
+.current-date {
     font-size: 1.5rem;
     font-weight: bold;
     min-width: 200px;
@@ -743,7 +743,7 @@ header {
         margin-bottom: 0.5rem;
     }
 
-    .month-navigation {
+    .expense-navigation {
         gap: 0.2rem;
         margin-bottom: 0.75rem;
     }
@@ -757,7 +757,7 @@ header {
         font-size: 1rem;
     }
     
-    .current-month {
+    .current-date {
         font-size: 1rem;
         text-align: center;
         min-width: 150px;

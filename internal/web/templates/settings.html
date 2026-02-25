@@ -37,7 +37,7 @@
         </header>
 
         <div class="info-field">
-            Version: <a href="https://github.com/DavyCools/expenseowl/releases/latest" target="_blank" rel="noopener noreferrer">v4.0</a>
+            Version: <a href="https://github.com/DavyCools/expenseowl/releases/latest" target="_blank" rel="noopener noreferrer">v4.7</a>
             <span class="separator">|</span>
             <a href="https://github.com/DavyCools/expenseowl/blob/main/README.md" target="_blank" rel="noopener noreferrer">Documentation</a>
             <span class="separator">|</span>
@@ -100,10 +100,6 @@
                     <div class="import-option">
                         <label for="csv-import-file" class="nav-button">Import from CSV</label>
                         <input type="file" id="csv-import-file" accept=".csv" style="display: none;">
-                    </div>
-                    <div class="import-option">
-                        <label for="csv-import-file-old" class="nav-button">Import from ExpenseOwl v3.20-</label>
-                        <input type="file" id="csv-import-file-old" accept=".csv" style="display: none;">
                     </div>
                 </div>
                 <div id="importMessage" class="form-message"></div>
@@ -784,50 +780,6 @@
 
             try {
                 const response = await fetch('/import/csv', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    messageDiv.textContent = 'Import completed!';
-                    messageDiv.className = 'form-message success';
-                    summaryDiv.style.display = 'block';
-                    document.getElementById('summary-processed').textContent = result.total_processed;
-                    document.getElementById('summary-imported').textContent = result.imported;
-                    document.getElementById('summary-skipped').textContent = result.skipped;
-                    document.getElementById('summary-new-categories').textContent = (result.new_categories || []).join(', ') || 'None';
-                    
-                    await initialize();
-                } else {
-                    messageDiv.textContent = `Error: ${result.error || 'Failed to import CSV'}`;
-                    messageDiv.className = 'form-message error';
-                }
-            } catch (error) {
-                console.error('Error importing CSV:', error);
-                messageDiv.textContent = 'Error: An unexpected error occurred during import.';
-                messageDiv.className = 'form-message error';
-            } finally {
-                event.target.value = '';
-            }
-        }
-
-        // TODO: remove in the future; handles import from EO < v3.20
-        async function handleCsvImportOld(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const formData = new FormData();
-            formData.append('file', file);
-            const messageDiv = document.getElementById('importMessage');
-            const summaryDiv = document.getElementById('importSummary');
-
-            messageDiv.textContent = 'Importing... this may take a while for large files.';
-            messageDiv.className = 'form-message';
-            summaryDiv.style.display = 'none';
-
-            try {
-                const response = await fetch('/import/csvold', {
                     method: 'POST',
                     body: formData
                 });

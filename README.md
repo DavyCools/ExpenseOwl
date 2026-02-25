@@ -214,14 +214,3 @@ ExpenseOwl is meant to make things simple, and importing CSV abides by the same 
 > ExpenseOwl goes through every row in the imported data, and will intelligently fail on rows that have invalid or absent data. There is a 10 millisecond delay per record to reduce disk/db overhead, so please allow appropriate time for ingestion (eg. ~10 seconds for 1000 records).
 
 Data exported as CSV will include expense IDs, so when importing the same CSV file, IDs will be maintained and skipped appropriately.
-
-An `Import from ExpenseOwl v3.2-` will be present for v4.X to allow pulling in data from past releases.
-
-# Contributing
-
-Contributions are welcome; please ensure they align with the project's philosophy of maintaining simplicity by strictly using the current tech stack (Go for backend; HTML, CSS, JS for frontend). It is intended for home lab use, i.e., a self-hosted first approach (containerized use). Consider the following:
-
-- Additions should have sensible defaults without breaking foundations
-- Environment variables can be used for system configuration in container and binary
-- Found a typo or need to ask a question? Please open an issue instead of a PR
-- To add a new backend type (say SQL, NocoDB, etc.), a new file can be added in the backend that implements the Storage interface

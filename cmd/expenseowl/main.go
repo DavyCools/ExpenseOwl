@@ -86,7 +86,6 @@ func runServer(port int) {
 	// Import/Export
 	http.HandleFunc("/export/csv", handler.ExportCSV)
 	http.HandleFunc("/import/csv", handler.ImportCSV)
-	http.HandleFunc("/import/csvold", handler.ImportOldCSV)
 
 	log.Println("Starting server on port", port, "...")
 	if err := http.ListenAndServe(fmt.Sprint(":", port), nil); err != nil {

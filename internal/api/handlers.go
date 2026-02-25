@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 
@@ -104,15 +105,15 @@ func (h *Handler) RenameCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var payload struct {
-		oldName string `json:"oldName"`
-		newName string `json:"newName"`
+		OldName string `json:"oldName"`
+		NewName string `json:"newName"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Invalid request body"})
 		return
 	}
 
-	newName, err := storage.ValidateCategory(payload.newName)
+	newName, err := storage.ValidateCategory(payload.NewName)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: fmt.Sprintf("Invalid new category name: %v", err)})
 		return
@@ -125,18 +126,18 @@ func (h *Handler) RenameCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !slices.Contains(categories, payload.oldName) {
+	if !slices.Contains(categories, payload.OldName) {
 		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Old category does not exist"})
 		return
 	}
 
-	if payload.oldName != newName && slices.Contains(categories, newName) {
+	if payload.OldName != newName && slices.Contains(categories, newName) {
 		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "New category name already exists"})
 		return
 	}
 
-	if i := slices.Index(categories, payload.oldName); i != -1 {
-    	categories[i] = newName
+	if i := slices.Index(categories, payload.OldName); i != -1 {
+		categories[i] = newName
 	}
 
 	expenses, err := h.storage.GetAllExpenses()
@@ -147,7 +148,7 @@ func (h *Handler) RenameCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i := range expenses {
-		if expenses[i].Category == payload.oldName {
+		if expenses[i].Category == payload.OldName {
 			expenses[i].Category = newName
 			if err := h.storage.UpdateExpense(expenses[i].ID, expenses[i]); err != nil {
 				writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to update expense"})
@@ -156,7 +157,6 @@ func (h *Handler) RenameCategory(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
 
 	recurringExpenses, err := h.storage.GetRecurringExpenses()
 	if err != nil {

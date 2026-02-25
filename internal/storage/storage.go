@@ -154,8 +154,8 @@ var RERepeatingSpaces *regexp.Regexp = regexp.MustCompile(`\s+`)
 
 // allows readable chars like unicode, otherwise replaces with whitespace
 func SanitizeString(s string) string {
-	sanitized := REInvalidChars.ReplaceAllString(s, " ")
-	sanitized = RERepeatingSpaces.ReplaceAllString(sanitized, " ")
+	// sanitized := REInvalidChars.ReplaceAllString(s, " ")
+	sanitized := RERepeatingSpaces.ReplaceAllString(s, " ")
 	return strings.TrimSpace(sanitized)
 }
 

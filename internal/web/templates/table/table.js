@@ -5,6 +5,7 @@ let expensesForTable = [];
 let startDate = 1;
 let allTags = new Set();
 let selectedTags = new Set();
+let timeRangeSelected = 'month';
 
 function createTable(expenses) {
     if (!expenses || expenses.length === 0) {
@@ -238,7 +239,6 @@ async function initialize() {
     }
 }
 
-let timeRangeSelected = 'month';
 document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
     radio.addEventListener('change', function() {
         if (this.checked) {

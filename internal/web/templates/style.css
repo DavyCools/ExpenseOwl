@@ -918,7 +918,7 @@ header {
     margin-bottom: 1rem;
 }
 
-.table-controls label {
+.table-controls > label {
     display: flex;
     align-items: center;
     gap: 0.3rem;
@@ -931,6 +931,10 @@ header {
     margin-right: 0.5rem;
 }
 
-.table-controls label:hover {
+.table-controls > label:hover {
     background-color: var(--accent);
+}
+
+.pointer {
+    cursor: pointer;
 }

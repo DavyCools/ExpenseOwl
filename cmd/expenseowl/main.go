@@ -49,14 +49,17 @@ func runServer(port int) {
 
 	// Static File Handlers
 	http.HandleFunc("/functions.js", handler.ServeStaticFile)
+	http.HandleFunc("/theme.js", handler.ServeStaticFile)
 	http.HandleFunc("/manifest.json", handler.ServeStaticFile)
 	http.HandleFunc("/sw.js", handler.ServeStaticFile)
-	http.HandleFunc("/pwa/", handler.ServeStaticFile)
+	http.HandleFunc("/icons/", handler.ServeStaticFile)
 	http.HandleFunc("/style.css", handler.ServeStaticFile)
-	http.HandleFunc("/favicon.ico", handler.ServeStaticFile)
+	http.HandleFunc("icons/favicon.ico", handler.ServeStaticFile)
 	http.HandleFunc("/chart.min.js", handler.ServeStaticFile)
 	http.HandleFunc("/fa.min.css", handler.ServeStaticFile)
 	http.HandleFunc("/webfonts/", handler.ServeStaticFile)
+	http.HandleFunc("/table/table.js", handler.ServeStaticFile)
+	http.HandleFunc("/settings/settings.js", handler.ServeStaticFile)
 
 	// Config
 	http.HandleFunc("/config", handler.GetConfig)
@@ -86,7 +89,6 @@ func runServer(port int) {
 	// Import/Export
 	http.HandleFunc("/export/csv", handler.ExportCSV)
 	http.HandleFunc("/import/csv", handler.ImportCSV)
-	http.HandleFunc("/import/csvold", handler.ImportOldCSV)
 
 	log.Println("Starting server on port", port, "...")
 	if err := http.ListenAndServe(fmt.Sprint(":", port), nil); err != nil {

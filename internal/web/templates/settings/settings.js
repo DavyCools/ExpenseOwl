@@ -1,0 +1,685 @@
+let categories = [];
+let allTags = new Set();
+let addFormSelectedTags = new Set();
+let editFormSelectedTags = new Set();
+let currentCurrency = "usd";
+let currentStartDate = 1;
+let draggedItem = null;
+let recurringExpenses = [];
+let recurringExpenseToDelete = null;
+let recurringExpenseToEdit = null;
+
+function showMessage(elementId, message, isSuccess) {
+    const messageDiv = document.getElementById(elementId);
+    messageDiv.textContent = message;
+    messageDiv.className = isSuccess ? 'form-message success' : 'form-message error';
+    setTimeout(() => {
+        messageDiv.textContent = '';
+        messageDiv.className = 'form-message';
+    }, 3000);
+}
+
+// --- Category Management ---
+function renderCategories() {
+    const list = document.getElementById('categories-list');
+    list.innerHTML = '';
+    categories.forEach((category, index) => {
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.draggable = true;
+        item.dataset.index = index;
+        item.innerHTML = `
+            <div class="category-handle-area">
+                <span class="drag-handle"><i class="fa-solid fa-grip-lines"></i></span>
+                <span class="category-name" id="category-name-${index}">${category}</span>
+                <input type="text" class="category-rename-input" id="category-input-${index}" value="${category}" style="display:none;">
+            </div>
+            <div class="category-actions">
+                <button class="edit-button" id="edit-btn-${index}" onclick="startRenameCategory(${index})" data-tooltip="Rename">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="save-rename-button" id="save-btn-${index}" onclick="saveRenameCategory(${index})" style="display:none;" data-tooltip="Save">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                <button class="cancel-rename-button" id="cancel-btn-${index}" onclick="cancelRenameCategory(${index})" style="display:none;" data-tooltip="Cancel">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+                <button class="delete-button" id="delete-btn-${index}" onclick="removeCategory(${index})" data-tooltip="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('dragleave', handleDragLeave);
+        item.addEventListener('dragend', handleDragEnd);
+        item.addEventListener('drop', handleDrop);
+        list.appendChild(item);
+    });
+}
+
+function handleDragStart(e) {
+    this.classList.add('dragging');
+    draggedItem = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    removePlaceholders();
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('drag-over');
+    if (this === draggedItem) return false;
+    const rect = this.getBoundingClientRect();
+    const clientY = e.clientY;
+    const threshold = rect.top + (rect.height / 2);
+    const isBefore = clientY < threshold;
+    removePlaceholders();
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    if (isBefore) {
+        this.parentNode.insertBefore(placeholder, this);
+    } else {
+        this.parentNode.insertBefore(placeholder, this.nextSibling);
+    }
+    return false;
+}
+
+function handleDragLeave() { this.classList.remove('drag-over'); }
+function handleDragEnd() {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.category-item, .tag-item').forEach(item => item.classList.remove('drag-over'));
+    removePlaceholders();
+}
+function removePlaceholders() { document.querySelectorAll('.placeholder').forEach(p => p.remove()); }
+
+function handleDrop(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    removePlaceholders();
+    if (draggedItem !== this) {
+        const fromIndex = parseInt(draggedItem.dataset.index, 10);
+        let toIndex = parseInt(this.dataset.index, 10);
+        const rect = this.getBoundingClientRect();
+        const isBefore = e.clientY < rect.top + rect.height / 2;
+        if (!isBefore) toIndex++;
+        if (fromIndex < toIndex) toIndex--;
+        const list = categories;
+        const movedItem = list.splice(fromIndex, 1)[0];
+        list.splice(toIndex, 0, movedItem);
+        renderCategories();
+    }
+    return false;
+}
+
+function addCategory() {
+    const input = document.getElementById('newCategory');
+    let category = input.value.trim();
+    category = category.replace(/[<>]/g, ' ').trim();
+    if (category && !categories.includes(category)) {
+        categories.push(category);
+        renderCategories();
+        input.value = '';
+    } else if (categories.includes(category)) {
+        showMessage('categoriesMessage', 'Category already exists', false);
+    } else if (!category) {
+        showMessage('categoriesMessage', 'Category name cannot be empty.', false);
+    }
+}
+
+function removeCategory(index) {
+    categories.splice(index, 1);
+    renderCategories();
+}
+
+function startRenameCategory(index) {
+    const nameSpan = document.getElementById(`category-name-${index}`);
+    const input = document.getElementById(`category-input-${index}`);
+    const editBtn = document.getElementById(`edit-btn-${index}`);
+    const saveBtn = document.getElementById(`save-btn-${index}`);
+    const cancelBtn = document.getElementById(`cancel-btn-${index}`);
+    const deleteBtn = document.getElementById(`delete-btn-${index}`);
+
+    nameSpan.style.display = 'none';
+    input.style.display = 'inline-block';
+    input.focus();
+    input.select();
+
+    editBtn.style.display = 'none';
+    deleteBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+}
+
+function cancelRenameCategory(index) {
+    const nameSpan = document.getElementById(`category-name-${index}`);
+    const input = document.getElementById(`category-input-${index}`);
+    const editBtn = document.getElementById(`edit-btn-${index}`);
+    const saveBtn = document.getElementById(`save-btn-${index}`);
+    const cancelBtn = document.getElementById(`cancel-btn-${index}`);
+    const deleteBtn = document.getElementById(`delete-btn-${index}`);
+
+    input.value = categories[index];
+    nameSpan.style.display = 'inline';
+    input.style.display = 'none';
+
+    editBtn.style.display = 'inline-block';
+    deleteBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+}
+
+async function saveRenameCategory(index) {
+    const input = document.getElementById(`category-input-${index}`);
+    let newName = input.value.trim();
+    newName = newName.replace(/[<>]/g, ' ').trim();
+    const oldName = categories[index];
+
+    if (!newName) {
+        showMessage('categoriesMessage', 'Category name cannot be empty', false);
+        return;
+    }
+
+    if (newName === oldName) {
+        cancelRenameCategory(index);
+        return;
+    }
+
+    if (categories.includes(newName)) {
+        showMessage('categoriesMessage', 'Category name already exists', false);
+        return;
+    }
+
+    try {
+        const response = await fetch('/categories/rename', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldName, newName })
+        });
+
+        if (response.ok) {
+            categories[index] = newName;
+            renderCategories();
+            showMessage('categoriesMessage', 'Category renamed successfully', true);
+        } else {
+            const error = await response.json();
+            showMessage('categoriesMessage', `Failed to rename category: ${error.error}`, false);
+        }
+    } catch (error) {
+        console.error('Error renaming category:', error);
+        showMessage('categoriesMessage', 'Error renaming category', false);
+    }
+}
+
+async function saveCategories() {
+    if (categories.length === 0) {
+        showMessage('categoriesMessage', 'At least one category is required', false);
+        return;
+    }
+    try {
+        const response = await fetch('/categories/edit', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categories)
+        });   
+        if (response.ok) {
+            showMessage('categoriesMessage', 'Categories saved successfully', true);
+        } else {
+            const error = await response.json();
+            showMessage('categoriesMessage', `Failed to save categories: ${error.error}`, false);
+        }
+    } catch (error) {
+        console.error('Error saving categories:', error);
+        showMessage('categoriesMessage', 'Error saving categories', false);
+    }
+}
+
+// --- Tag Input Component ---
+function createTagInput(inputId, selectedContainerId, dropdownId, selectedTagsSet) {
+    const input = document.getElementById(inputId);
+    const selectedContainer = document.getElementById(selectedContainerId);
+    const dropdown = document.getElementById(dropdownId);
+
+    const renderSelected = () => {
+        selectedContainer.innerHTML = '';
+        selectedTagsSet.forEach(tag => {
+            const pill = document.createElement('div');
+            pill.className = 'tag-pill';
+            pill.textContent = tag;
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'remove-tag';
+            removeBtn.textContent = '×';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                selectedTagsSet.delete(tag);
+                renderSelected();
+            };
+            pill.appendChild(removeBtn);
+            selectedContainer.appendChild(pill);
+        });
+    };
+
+    const addTag = (tag) => {
+        tag = tag.trim().replace(/[<>]/g, ' ').trim();
+        if (tag) {
+            selectedTagsSet.add(tag);
+            renderSelected();
+        }
+        input.value = '';
+        dropdown.style.display = 'none';
+    };
+    
+    input.addEventListener('focus', () => {
+        const value = input.value.trim().toLowerCase();
+        dropdown.innerHTML = '';
+        const availableTags = [...allTags].filter(tag => !selectedTagsSet.has(tag));
+        if (availableTags.length > 0) {
+            availableTags.forEach(tag => {
+                const item = document.createElement('div');
+                item.textContent = tag;
+                item.onclick = () => addTag(tag);
+                dropdown.appendChild(item);
+            });
+            dropdown.style.display = 'block';
+        }
+    });
+
+    input.addEventListener('input', () => {
+        const value = input.value.trim().toLowerCase();
+        dropdown.innerHTML = '';
+        const filteredTags = [...allTags].filter(tag => tag.toLowerCase().includes(value) && !selectedTagsSet.has(tag));
+
+        if (value && ![...allTags].map(t => t.toLowerCase()).includes(value)) {
+            const newItem = document.createElement('div');
+            newItem.textContent = `+ Create "${input.value.trim()}"`;
+            newItem.className = 'new-tag';
+            newItem.onclick = () => addTag(input.value.trim());
+            dropdown.appendChild(newItem);
+        }
+        
+        filteredTags.forEach(tag => {
+            const item = document.createElement('div');
+            item.textContent = tag;
+            item.onclick = () => addTag(tag);
+            dropdown.appendChild(item);
+        });
+        dropdown.style.display = dropdown.children.length > 0 ? 'block' : 'none';
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (input.value.trim()) addTag(input.value.trim());
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const container = input.closest('.tags-input-container');
+        if (container && !container.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+    return { renderSelected };
+}
+
+// --- Currency & Start Date ---
+function populateCurrencySelect() {
+    const select = document.getElementById('currencySelect');
+    select.innerHTML = Object.keys(currencyBehaviors).map(code => 
+        `<option value="${code}" ${code === currentCurrency ? 'selected' : ''}>
+            ${code.toUpperCase()} (${currencyBehaviors[code].symbol})
+        </option>`
+    ).join('');
+}
+
+async function saveCurrency() {
+    const currencyCode = document.getElementById('currencySelect').value;
+    try {
+        const response = await fetch('/currency/edit', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currencyCode)
+        });
+        if (response.ok) {
+            showMessage('currencyMessage', 'Currency saved successfully', true);
+            currentCurrency = currencyCode;
+        } else {
+            showMessage('currencyMessage', 'Failed to save currency', false);
+        }
+    } catch (error) {
+        console.error('Error saving currency:', error);
+        showMessage('currencyMessage', 'Error saving currency', false);
+    }
+}
+
+function populateStartDateInput() {
+    document.getElementById("startDate").value = currentStartDate;
+}
+
+async function saveStartDate() {
+    const startDateValue = document.getElementById("startDate").value;
+    try {
+        const response = await fetch('/startdate/edit', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parseInt(startDateValue, 10))
+        });
+        showMessage('startDateMessage', response.ok ? 'Start date saved successfully' : 'Failed to save start date', response.ok);
+    } catch (error) {
+        console.error('Error saving start date:', error);
+        showMessage('startDateMessage', 'Error saving start date', false);
+    }
+}
+
+async function fetchAndRenderRecurringExpenses() {
+    try {
+        const response = await fetch('/recurring-expenses');
+        if (!response.ok) throw new Error('Failed to fetch recurring expenses');
+        recurringExpenses = await response.json() || [];
+        renderRecurringExpenses(recurringExpenses);
+    } catch (error) {
+        console.error('Error fetching recurring expenses:', error);
+        document.getElementById('recurring-expenses-list').innerHTML = '<p>Error loading recurring expenses.</p>';
+    }
+}
+
+function findNextOccurrence(r) {
+    let nextDate = new Date(r.startDate);
+    const today = new Date();
+    if (nextDate >= today) return nextDate.toLocaleDateString();
+    if (r.occurrences > 0) {
+        let occurrencesCount = 0;
+        while (nextDate < today) {
+            occurrencesCount++;
+            if (occurrencesCount >= r.occurrences) return 'Finished';
+            switch(r.interval) {
+                case 'daily': nextDate.setDate(nextDate.getDate() + 1); break;
+                case 'weekly': nextDate.setDate(nextDate.getDate() + 7); break;
+                case 'monthly': nextDate.setMonth(nextDate.getMonth() + 1); break;
+                case 'yearly': nextDate.setFullYear(nextDate.getFullYear() + 1); break;
+            }
+        }
+        return nextDate.toLocaleDateString();
+    } else { // Indefinite
+            while (nextDate < today) {
+            switch(r.interval) {
+                case 'daily': nextDate.setDate(nextDate.getDate() + 1); break;
+                case 'weekly': nextDate.setDate(nextDate.getDate() + 7); break;
+                case 'monthly': nextDate.setMonth(nextDate.getMonth() + 1); break;
+                case 'yearly': nextDate.setFullYear(nextDate.getFullYear() + 1); break;
+            }
+        }
+        return nextDate.toLocaleDateString();
+    }
+}
+
+function renderRecurringExpenses(recurring) {
+    const list = document.getElementById('recurring-expenses-list');
+    if (!recurring || recurring.length === 0) {
+        list.innerHTML = '<p>No recurring expenses found.</p>';
+        return;
+    }
+    list.innerHTML = `
+        <table class="expense-table">
+            <thead><tr><th>Name</th><th>Amount</th><th>Category</th><th>Interval</th><th>Next Occurrence</th><th></th></tr></thead>
+            <tbody>
+                ${recurring.map(r => `
+                    <tr>
+                        <td>${r.name}</td>
+                        <td>${formatCurrency(r.amount)}</td>
+                        <td>${r.category}</td>
+                        <td>${r.interval.charAt(0).toUpperCase() + r.interval.slice(1)}</td>
+                        <td>${findNextOccurrence(r)}</td>
+                        <td>
+                            <button class="edit-button" onclick="showRecurringEditModal('${r.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="delete-button" onclick="showRecurringDeleteModal('${r.id}')"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>`;
+}
+
+function showRecurringDeleteModal(id) {
+    recurringExpenseToDelete = id;
+    document.getElementById('deleteRecurringModal').classList.add('active');
+}
+
+function closeRecurringDeleteModal() {
+    recurringExpenseToDelete = null;
+    document.getElementById('deleteRecurringModal').classList.remove('active');
+}
+
+async function confirmRecurringDelete(removeAll) {
+    if (!recurringExpenseToDelete) return;
+    try {
+        const response = await fetch(`/recurring-expense/delete?id=${recurringExpenseToDelete}&removeAll=${removeAll}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete recurring expense');
+        showMessage('recurringExpenseMessage', 'Recurring expense deleted successfully', true);
+        fetchAndRenderRecurringExpenses();
+    } catch (error) {
+        console.error('Error deleting recurring expense:', error);
+        showMessage('recurringExpenseMessage', 'Failed to delete recurring expense', false);
+    } finally {
+        closeRecurringDeleteModal();
+    }
+}
+
+function showRecurringEditModal(id) {
+    recurringExpenseToEdit = recurringExpenses.find(r => r.id === id);
+    if (!recurringExpenseToEdit) return;
+    document.getElementById('editRecurringName').value = recurringExpenseToEdit.name;
+    document.getElementById('editRecurringAmount').value = Math.abs(recurringExpenseToEdit.amount);
+    document.getElementById('editRecurringReportGain').checked = recurringExpenseToEdit.amount > 0;
+    document.getElementById('editRecurringCategory').value = recurringExpenseToEdit.category;
+    document.getElementById('editRecurringInterval').value = recurringExpenseToEdit.interval;
+    document.getElementById('editRecurringStartDate').value = new Date(recurringExpenseToEdit.startDate).toISOString().split('T')[0];
+    document.getElementById('editRecurringOccurrences').value = recurringExpenseToEdit.occurrences;
+    editFormSelectedTags = new Set(recurringExpenseToEdit.tags || []);
+    createTagInput('edit-tags-input', 'edit-selected-tags', 'edit-tags-dropdown', editFormSelectedTags).renderSelected();
+    document.getElementById('editRecurringModal').classList.add('active');
+}
+
+function closeRecurringEditModal() {
+    recurringExpenseToEdit = null;
+    document.getElementById('editRecurringModal').classList.remove('active');
+}
+
+async function confirmRecurringUpdate(updateAll) {
+    if (!recurringExpenseToEdit) return;
+    let amount = parseFloat(document.getElementById('editRecurringAmount').value);
+    if (!document.getElementById('editRecurringReportGain').checked) {
+        amount *= -1;
+    }
+
+    const updatedData = {
+        ...recurringExpenseToEdit,
+        name: document.getElementById('editRecurringName').value,
+        amount: amount,
+        category: document.getElementById('editRecurringCategory').value,
+        tags: Array.from(editFormSelectedTags),
+        interval: document.getElementById('editRecurringInterval').value,
+        startDate: new Date(document.getElementById('editRecurringStartDate').value).toISOString(),
+        occurrences: parseInt(document.getElementById('editRecurringOccurrences').value, 10)
+    };
+    
+    try {
+        const response = await fetch(`/recurring-expense/edit?id=${recurringExpenseToEdit.id}&updateAll=${updateAll}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        });
+        if (!response.ok) throw new Error('Failed to update recurring expense');
+        showMessage('recurringExpenseMessage', 'Recurring expense updated successfully', true);
+        fetchAndRenderRecurringExpenses();
+    } catch(error) {
+        console.error('Error updating recurring expense:', error);
+        showMessage('recurringExpenseMessage', 'Failed to update recurring expense', false);
+    } finally {
+        closeRecurringEditModal();
+    }
+}
+
+// --- Import/Export ---
+async function handleCsvImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    const messageDiv = document.getElementById('importMessage');
+    const summaryDiv = document.getElementById('importSummary');
+
+    messageDiv.textContent = 'Importing... this may take a while for large files.';
+    messageDiv.className = 'form-message';
+    summaryDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/import/csv', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            messageDiv.textContent = 'Import completed!';
+            messageDiv.className = 'form-message success';
+            summaryDiv.style.display = 'block';
+            document.getElementById('summary-processed').textContent = result.total_processed;
+            document.getElementById('summary-imported').textContent = result.imported;
+            document.getElementById('summary-skipped').textContent = result.skipped;
+            document.getElementById('summary-new-categories').textContent = (result.new_categories || []).join(', ') || 'None';
+            
+            await initialize();
+        } else {
+            messageDiv.textContent = `Error: ${result.error || 'Failed to import CSV'}`;
+            messageDiv.className = 'form-message error';
+        }
+    } catch (error) {
+        console.error('Error importing CSV:', error);
+        messageDiv.textContent = 'Error: An unexpected error occurred during import.';
+        messageDiv.className = 'form-message error';
+    } finally {
+        event.target.value = '';
+    }
+}
+
+// --- Initialization ---
+async function initialize() {
+    try {
+        const [configResponse, expensesResponse, recurringExpensesResponse] = await Promise.all([
+            fetch('/config'),
+            fetch('/expenses'),
+            fetch('/recurring-expenses')
+        ]);
+        if (!configResponse.ok) throw new Error('Failed to fetch configuration');
+        const config = await configResponse.json();
+        if (!expensesResponse.ok) throw new Error('Failed to fetch expenses');
+        const expenses = await expensesResponse.json();
+        if (!recurringExpensesResponse.ok) throw new Error('Failed to fetch recurring expenses');
+        recurringExpenses = await recurringExpensesResponse.json() || [];
+
+        categories = [...config.categories];
+        currentCurrency = config.currency;
+        currentStartDate = config.startDate;
+        allTags.clear();
+        (expenses || []).forEach(exp => (exp.tags || []).forEach(tag => allTags.add(tag)));
+        (recurringExpenses || []).forEach(exp => (exp.tags || []).forEach(tag => allTags.add(tag)));
+
+        renderCategories();
+        populateCurrencySelect();
+        populateStartDateInput();
+        document.getElementById('recurringCategory').innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        document.getElementById('editRecurringCategory').innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        renderRecurringExpenses(recurringExpenses);
+
+        createTagInput('tags-input', 'selected-tags', 'tags-dropdown', addFormSelectedTags);
+        fetch('/version').then(r => r.ok ? r.text() : 'dev').then(version => {
+            const link = document.getElementById('version-link');
+            if (link !== null) {
+                link.textContent = version;
+                if (version !== 'dev') link.href = `https://github.com/DavyCools/expenseowl/releases/tag/${version}`;
+            }
+        }).catch(e => console.error('Failed to fetch version:', e));
+
+    } catch (error) {
+        console.error('Failed to initialize settings:', error);
+        showMessage('categoriesMessage', 'Failed to load settings', false);
+    }
+}
+
+// --- Theme Management ---
+const themeSelect = document.getElementById('themeSelect');
+const currentTheme = localStorage.getItem('theme') || 'system';
+themeSelect.value = currentTheme;
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+}
+themeSelect.addEventListener('change', (e) => {
+    const selectedTheme = e.target.value;
+    localStorage.setItem('theme', selectedTheme);
+    applyTheme(selectedTheme);
+    showMessage('themeMessage', 'Theme updated successfully.', true);
+});
+
+// --- Event Listeners ---
+document.getElementById('addCategory').addEventListener('click', addCategory);
+document.getElementById('saveCategories').addEventListener('click', saveCategories);
+document.getElementById('saveCurrency').addEventListener('click', saveCurrency);
+document.getElementById('saveStartDate').addEventListener('click', saveStartDate);
+document.getElementById('csv-import-file').addEventListener('change', handleCsvImport);
+document.getElementById('newCategory').addEventListener('keypress', e => e.key === 'Enter' && addCategory());
+
+document.getElementById('recurringExpenseForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const isGain = document.getElementById('recurringReportGain').checked;
+    let amount = parseFloat(document.getElementById('recurringAmount').value);
+    if (!isGain) amount *= -1;
+
+    const formData = {
+        name: document.getElementById('recurringName').value,
+        amount: amount,
+        category: document.getElementById('recurringCategory').value,
+        tags: Array.from(addFormSelectedTags),
+        interval: document.getElementById('recurringInterval').value,
+        startDate: getISODateWithLocalTime(document.getElementById('recurringStartDate').value),
+        occurrences: parseInt(document.getElementById('recurringOccurrences').value, 10)
+    };
+
+    try {
+        const response = await fetch('/recurring-expense', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        if (response.ok) {
+            showMessage('recurringExpenseMessage', 'Recurring expense added successfully!', true);
+            document.getElementById('recurringExpenseForm').reset();
+            document.getElementById('selected-tags').innerHTML = '';
+            addFormSelectedTags.clear();
+            fetchAndRenderRecurringExpenses();
+        } else {
+            const error = await response.json();
+            showMessage('recurringExpenseMessage', `Error: ${error.error || 'Failed to add recurring expense'}`, false);
+        }
+    } catch (error) {
+        console.error('Error adding recurring expense:', error);
+        showMessage('recurringExpenseMessage', 'Error: Failed to add recurring expense', false);
+    }
+});
+
+document.addEventListener('DOMContentLoaded', initialize);
+window.removeCategory = removeCategory;
+window.showRecurringDeleteModal = showRecurringDeleteModal;
+window.closeRecurringDeleteModal = closeRecurringDeleteModal;
+window.confirmRecurringDelete = confirmRecurringDelete;
+window.showRecurringEditModal = showRecurringEditModal;
+window.closeRecurringEditModal = closeRecurringEditModal;
+window.confirmRecurringUpdate = confirmRecurringUpdate;

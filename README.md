@@ -20,11 +20,7 @@
 
 <br>
 
-# Why Create This?
-
-There are a ton of amazing projects for expense tracking across GitHub ([Actual](https://github.com/actualbudget/actual), [Firefly III](https://github.com/firefly-iii/firefly-iii), etc.). They're all incredible! I just don't find them *fast* and *simple*. They offer too many features I never use (like accounts or complex budgeting). *Don't get me wrong!* They're amazing when complexity is needed, but I wanted something ***dead simple*** that gives me a quick monthly look at my expenses. NOTHING else!
-
-So, I created this project and I use it in my home lab for expenses. The primary intention is to track spending across your categories in a simplistic manner. No complications, searching, budgeting. This is *not* a budgeting app; it's for tracking.
+<b>Forked from <a gref="https://github.com/Tanq16/ExpenseOwl">Tanq16/ExpenseOwl v4.7</a>, substantially modified</b>
 
 # Features
 
@@ -63,27 +59,6 @@ The front end of ExpenseOwl can be installed as a Progressive Web App on desktop
 - iOS: Use Safari's "Add to Home Screen" option in the share menu
 - Android: Use Chrome's "Install" option in the menu
 
-# Screenshots
-
-Dashboard Showcase:
-
-| | Desktop View | Mobile View |
-| --- | --- | --- |
-| Dark | <img src="/assets/ddark-main.png" alt="Dashboard Dark" /> | <img src="/assets/mdark-main.png" alt="Mobile Dashboard Dark" /> |
-| Light | <img src="/assets/dlight-main.png" alt="Dashboard Light" /> | <img src="/assets/mlight-main.png" alt="Mobile Dashboard Light" /> |
-
-<details>
-<summary>Expand this to see screenshots of other pages</summary>
-
-| | Desktop View | Mobile View |
-| --- | --- | --- |
-| Table Dark | <img src="/assets/ddark-table.png" alt="Dashboard Dark" /> | <img src="/assets/mdark-table.png" alt="Mobile Dashboard Dark" /> |
-| Table Light | <img src="/assets/dlight-table.png" alt="Dashboard Light" /> | <img src="/assets/mlight-table.png" alt="Mobile Dashboard Light" /> |
-| Settings Dark | <img src="/assets/ddark-settings.png" alt="Table Dark" /> | <img src="/assets/mdark-settings.png" alt="Mobile Table Dark" /> |
-| Settings Light | <img src="/assets/dlight-settings.png" alt="Table Light" /> | <img src="/assets/mlight-settings.png" alt="Mobile Table Light" /> |
-
-</details>
-
 # Installation
 
 The recommended installation method is Docker. To run the container via CLI, use the following command:
@@ -93,7 +68,7 @@ docker run --rm -d \
   --name expenseowl \
   -p 8080:8080 \
   -v expenseowl:/app/data \
-  davy123/expenseowl:main
+  davy123/expenseowl:latest
 ```
 
 To use Docker compose, use this YAML definition:
@@ -101,7 +76,7 @@ To use Docker compose, use this YAML definition:
 ```yaml
 services:
   expenseowl:
-    image: davy123/expenseowl:main
+    image: davy123/expenseowl:latest
     restart: unless-stopped
     ports:
       - 5006:8080 # change 5006 to what you want to expose on
@@ -140,20 +115,6 @@ Once deployed, use the web interface to do everything. Access it through your br
 
 > [!NOTE]
 > This app does not include authentication, so deploy carefully. I don't want to add half-baked authentication, so use Authelia, or equivalent as needed. ExpenseOwl works well with a reverse proxy like Nginx Proxy Manager too and is intended for homelab use only.
-
-### Conventions
-
-Since writing the app, I've found a ton of ways applications handle expenses. Release v4.0 solidifies the conventions I will continue to maintain the app in.
-
-- Expenses are categorized by a -ve value, while income or reimbursement (designated by the `Report as gain` checkbox) are +ve
-- Expense dates are stored as UTC strings in RFC3339 format, however, the frontend hides the time value from the user; users are meant to select a date, and the current local time is automatically added to the given date
-- Future and recurring expenses extending into future dates are added immediately to the backend
-- The primary way to use ExpenseOwl is to quick review the month's stats via the pie chart - this allows users to make a mental note and soft decision of where to spend money, without the effort of maintaining a budget
-- Categories are meant to be used as a classification criteria - example, how much did I spend on food, groceries, and utilities, etc.
-- Tags are optional and are meant to assign features and characteristics to expenses.
-
-> [!NOTE]
-> While these conventions can change during the project's lifecycle, largely, the intention (stemming from the motivation to build ExpenseOwl) behind simple, manual, easy tracking will not change.
 
 ### Configuration Options
 
@@ -214,14 +175,3 @@ ExpenseOwl is meant to make things simple, and importing CSV abides by the same 
 > ExpenseOwl goes through every row in the imported data, and will intelligently fail on rows that have invalid or absent data. There is a 10 millisecond delay per record to reduce disk/db overhead, so please allow appropriate time for ingestion (eg. ~10 seconds for 1000 records).
 
 Data exported as CSV will include expense IDs, so when importing the same CSV file, IDs will be maintained and skipped appropriately.
-
-An `Import from ExpenseOwl v3.2-` will be present for v4.X to allow pulling in data from past releases.
-
-# Contributing
-
-Contributions are welcome; please ensure they align with the project's philosophy of maintaining simplicity by strictly using the current tech stack (Go for backend; HTML, CSS, JS for frontend). It is intended for home lab use, i.e., a self-hosted first approach (containerized use). Consider the following:
-
-- Additions should have sensible defaults without breaking foundations
-- Environment variables can be used for system configuration in container and binary
-- Found a typo or need to ask a question? Please open an issue instead of a PR
-- To add a new backend type (say SQL, NocoDB, etc.), a new file can be added in the backend that implements the Storage interface

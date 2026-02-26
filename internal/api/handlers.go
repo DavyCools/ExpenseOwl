@@ -456,7 +456,7 @@ func (h *Handler) ServeTableView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html")
-	if err := web.ServeTemplate(w, "table.html"); err != nil {
+	if err := web.ServeTemplate(w, "table/table.html"); err != nil {
 		http.Error(w, "Failed to serve template", http.StatusInternalServerError)
 	}
 }
@@ -467,7 +467,7 @@ func (h *Handler) ServeSettingsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html")
-	if err := web.ServeTemplate(w, "settings.html"); err != nil {
+	if err := web.ServeTemplate(w, "settings/settings.html"); err != nil {
 		http.Error(w, "Failed to serve template", http.StatusInternalServerError)
 	}
 }

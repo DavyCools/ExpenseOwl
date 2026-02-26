@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/fa.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <script src="./theme.js" defer></script>
+    <title>ExpenseOwl Settings</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="nav-bar">
+                <a href="/">
+                    <img src="/icons/icon-192.png" alt="ExpenseOwl Logo" height="85" style="vertical-align: middle; margin-right: 20px;">
+                </a>
+                <a href="/" class="view-button" data-tooltip="Dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </a>
+                <a href="/table" class="view-button" data-tooltip="Table View">
+                    <i class="fa-solid fa-table"></i>
+                </a>
+                <a href="/settings" class="view-button active" data-tooltip="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+        </header>
+
+        <div class="info-field">
+            Version: <a href="https://github.com/DavyCools/expenseowl/releases/latest" target="_blank" rel="noopener noreferrer">v4.7</a>
+            <span class="separator">|</span>
+            <a href="https://github.com/DavyCools/expenseowl/blob/main/README.md" target="_blank" rel="noopener noreferrer">Documentation</a>
+            <span class="separator">|</span>
+            <a href="https://github.com/DavyCools/expenseowl" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+
+        <div class="form-container">
+            <h2 align="center">Category Settings</h2>
+            <div id="categories-manager">
+                <div id="categories-list" class="categories-list">
+                </div>
+                <div class="category-input-container">
+                    <input type="text" id="newCategory" placeholder="Add new category">
+                    <button id="addCategory" class="nav-button">Add</button>
+                </div>
+                <button id="saveCategories" class="nav-button">Save Categories</button>
+                <div id="categoriesMessage" class="form-message"></div>
+            </div>
+        </div>
+
+        <div class="settings-container">
+            <div class="form-container half-width">
+                <h2 align="center">Currency Settings</h2>
+                <div class="currency-selector">
+                    <select id="currencySelect">
+                    </select>
+                    <button id="saveCurrency" class="nav-button">Save</button>
+                </div>
+                <div id="currencyMessage" class="form-message"></div>
+            </div>
+            
+            <div class="form-container half-width">
+                <h2 align="center">Start Date Settings</h2>
+                <div class="start-date-manager">
+                    <input type="number" id="startDate" min="1" max="31" placeholder="1">
+                    <button id="saveStartDate" class="nav-button">Save</button>
+                </div>
+                <div id="startDateMessage" class="form-message"></div>
+            </div>
+        </div>
+
+        <div class="settings-container">
+            <div class="form-container half-width">
+                <h2 align="center">Theme Settings</h2>
+                <div class="theme-selector">
+                    <select id="themeSelect">
+                        <option value="system">System Default</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div id="themeMessage" class="form-message"></div>
+            </div>
+            <div class="form-container half-width">
+                <h2 align="center">Import/Export Data</h2>
+                <div class="export-buttons">
+                    <div class="export-options">
+                        <a href="/export/csv" id="csv-export-file" class="nav-button" download="expenses.csv">Export to CSV</a>
+                    </div>
+                    <div class="import-option">
+                        <label for="csv-import-file" class="nav-button">Import from CSV</label>
+                        <input type="file" id="csv-import-file" accept=".csv" style="display: none;">
+                    </div>
+                </div>
+                <div id="importMessage" class="form-message"></div>
+                <div id="importSummary" class="import-summary" style="display: none;">
+                    <h3>Import Summary</h3>
+                    <p>Total Processed: <span id="summary-processed"></span></p>
+                    <p>Imported: <span id="summary-imported"></span></p>
+                    <p>Skipped: <span id="summary-skipped"></span></p>
+                    <p>New Categories: <span id="summary-new-categories"></span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <h2 align="center">Recurring Transactions</h2>
+            <form id="recurringExpenseForm" class="expense-form recurring-expense-form">
+                <div class="form-group">
+                    <label for="recurringName">Name</label>
+                    <input type="text" id="recurringName" required>
+                </div>
+                <div class="form-group">
+                    <label for="recurringAmount">Amount</label>
+                    <input type="number" id="recurringAmount" step="0.01" min="0.01" max="9000000000000000" required>
+                </div>
+                <div class="form-group">
+                    <label for="recurringCategory">Category</label>
+                    <select id="recurringCategory" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="tags-input">Tags</label>
+                    <div class="tags-input-container">
+                        <div id="selected-tags" class="selected-tags"></div>
+                        <input type="text" id="tags-input" placeholder="(optional)">
+                    </div>
+                    <div id="tags-dropdown" class="tags-dropdown"></div>
+                </div>
+                <div class="form-group">
+                    <label for="recurringInterval">Interval</label>
+                    <select id="recurringInterval" required>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="recurringStartDate">Start Date</label>
+                    <input type="date" id="recurringStartDate" required>
+                    <script>
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
+                        document.getElementById('recurringStartDate').value = formattedDate;
+                    </script>
+                </div>
+                <div class="form-group">
+                    <label for="recurringOccurrences">Occurrences</label>
+                    <input type="number" id="recurringOccurrences" min="2" value="2" required>
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <label for="recurringReportGain">Report Gain</label>
+                    <input type="checkbox" id="recurringReportGain" class="styled-checkbox">
+                </div>
+                <button type="submit" class="nav-button">Add Recurring Transaction</button>
+            </form>
+            <div id="recurringExpenseMessage" class="form-message"></div>
+            <h3 align="center" style="margin-top: 2rem;">Existing Recurring Transactions</h3>
+            <div id="recurring-expenses-list">
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteRecurringModal" class="modal">
+        <div class="modal-content">
+            <h3>Delete Recurring Expense</h3>
+            <p>Do you want to delete all instances of this expense, or only future ones?</p>
+            <div class="modal-buttons">
+                <button class="modal-button" onclick="closeRecurringDeleteModal()">Cancel</button>
+                <button class="modal-button" onclick="confirmRecurringDelete(false)">Delete Future</button>
+                <button class="modal-button confirm" onclick="confirmRecurringDelete(true)">Delete All</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editRecurringModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Recurring Expense</h3>
+            <form id="editRecurringExpenseForm" class="expense-form recurring-expense-form">
+                 <div class="form-group">
+                    <label for="editRecurringName">Name</label>
+                    <input type="text" id="editRecurringName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRecurringAmount">Amount</label>
+                    <input type="number" id="editRecurringAmount" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRecurringCategory">Category</label>
+                    <select id="editRecurringCategory" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tags-input">Tags</label>
+                    <div class="tags-input-container">
+                        <div id="edit-selected-tags" class="selected-tags"></div>
+                        <input type="text" id="edit-tags-input" placeholder="(optional)">
+                    </div>
+                    <div id="edit-tags-dropdown" class="tags-dropdown"></div>
+                </div>
+                <div class="form-group">
+                    <label for="editRecurringInterval">Interval</label>
+                    <select id="editRecurringInterval" required>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editRecurringStartDate">Start Date</label>
+                    <input type="date" id="editRecurringStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRecurringOccurrences">Occurrences (0 for indefinite)</label>
+                    <input type="number" id="editRecurringOccurrences" min="0" value="0" required>
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <label for="editRecurringReportGain">Report Gain</label>
+                    <input type="checkbox" id="editRecurringReportGain" class="styled-checkbox">
+                </div>
+            </form>
+            <div class="modal-buttons">
+                <button class="modal-button" onclick="closeRecurringEditModal()">Cancel</button>
+                <button class="modal-button" onclick="confirmRecurringUpdate(false)">Update Future</button>
+                <button class="modal-button confirm" onclick="confirmRecurringUpdate(true)">Update All</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/settings/settings.js"></script>
+    <script src="/functions.js"></script>
+</body>
+</html>

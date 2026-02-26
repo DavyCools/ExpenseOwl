@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.new_version }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,6 +57,7 @@ jobs:
       - name: Upload Release Asset
         run: |
           gh release upload "${{ needs.create-release.outputs.version }}" \
+            --url "${{ needs.create-release.outputs.upload_url }}" \
             "expenseowl-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}"
         env:
           GH_TOKEN: ${{ github.token }}

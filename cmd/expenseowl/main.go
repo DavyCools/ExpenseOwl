@@ -54,7 +54,7 @@ func runServer(port int) {
 	http.HandleFunc("/sw.js", handler.ServeStaticFile)
 	http.HandleFunc("/icons/", handler.ServeStaticFile)
 	http.HandleFunc("/style.css", handler.ServeStaticFile)
-	http.HandleFunc("/favicon.ico", handler.ServeStaticFile)
+	http.HandleFunc("icons/favicon.ico", handler.ServeStaticFile)
 	http.HandleFunc("/chart.min.js", handler.ServeStaticFile)
 	http.HandleFunc("/fa.min.css", handler.ServeStaticFile)
 	http.HandleFunc("/webfonts/", handler.ServeStaticFile)

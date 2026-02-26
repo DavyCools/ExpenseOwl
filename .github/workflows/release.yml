@@ -57,7 +57,7 @@ jobs:
       - name: Upload Release Asset
         run: |
           gh release upload "${{ needs.create-release.outputs.version }}" \
-            --url "${{ needs.create-release.outputs.upload_url }}" \
+            --clobber \
             "expenseowl-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}"
         env:
           GH_TOKEN: ${{ github.token }}

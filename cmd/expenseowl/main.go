@@ -59,6 +59,7 @@ func runServer(port int) {
 	http.HandleFunc("/fa.min.css", handler.ServeStaticFile)
 	http.HandleFunc("/webfonts/", handler.ServeStaticFile)
 	http.HandleFunc("/table/table.js", handler.ServeStaticFile)
+	http.HandleFunc("/settings/settings.js", handler.ServeStaticFile)
 
 	// Config
 	http.HandleFunc("/config", handler.GetConfig)

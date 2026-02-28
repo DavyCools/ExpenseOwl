@@ -315,6 +315,31 @@
         function updateLegend(categoryData) {
             const legendContainer = document.getElementById('customLegend');
             legendContainer.innerHTML = '';
+            // --- TAG VISIBILITY TOGGLE ---
+            let showTags = window.localStorage.getItem('showTagsInLegend');
+            if (showTags === null) showTags = '1';
+            let showTagsBool = showTags === '1';
+            const toggleDiv = document.createElement('div');
+            toggleDiv.style.display = 'flex';
+            toggleDiv.style.alignItems = 'center';
+            toggleDiv.style.justifyContent = 'flex-end';
+            toggleDiv.style.marginBottom = '0.5rem';
+            toggleDiv.style.gap = '0.5rem';
+            const toggleLabel = document.createElement('label');
+            toggleLabel.style.cursor = 'pointer';
+            toggleLabel.style.fontSize = '0.95em';
+            toggleLabel.innerText = 'Show tags';
+            const toggleInput = document.createElement('input');
+            toggleInput.type = 'checkbox';
+            toggleInput.checked = showTagsBool;
+            toggleInput.style.marginLeft = '0.5em';
+            toggleInput.addEventListener('change', function() {
+                window.localStorage.setItem('showTagsInLegend', this.checked ? '1' : '0');
+                updateLegend(categoryData);
+            });
+            toggleLabel.prepend(toggleInput);
+            toggleDiv.appendChild(toggleLabel);
+            legendContainer.appendChild(toggleDiv);
             const dateFilteredExpenses = getExpenses(allExpenses, timeRangeSelected);
             const currentDateCategories = [...new Set(dateFilteredExpenses
                 .filter(exp => exp.amount < 0)
@@ -344,6 +369,48 @@
                 `;
                 item.addEventListener('click', () => toggleCategory(category));
                 legendContainer.appendChild(item);
+
+                if (showTagsBool) {
+                    // --- TAGS UNDER CATEGORY ---
+                    // Get all tags for this category in the filtered expenses
+                    const tagTotals = {};
+                    dateFilteredExpenses
+                        .filter(exp => exp.amount < 0 && exp.category === category && Array.isArray(exp.tags))
+                        .forEach(exp => {
+                            exp.tags.forEach(tag => {
+                                if (!tagTotals[tag]) tagTotals[tag] = 0;
+                                tagTotals[tag] += Math.abs(exp.amount);
+                            });
+                        });
+                    const tagNames = Object.keys(tagTotals);
+                    if (tagNames.length > 0) {
+                        // Sort tags by total descending
+                        tagNames.sort((a, b) => tagTotals[b] - tagTotals[a]);
+                        const tagList = document.createElement('div');
+                        tagList.style.marginLeft = '2.5rem';
+                        tagList.style.marginTop = '0.25rem';
+                        tagList.style.marginBottom = '0.5rem';
+                        tagList.style.display = 'flex';
+                        tagList.style.flexDirection = 'column';
+                        tagNames.forEach(tag => {
+                            const percentage = categoryDataItem && categoryDataItem.total > 0 ? ` (${((tagTotals[tag] / categoryDataItem.total) * 100).toFixed(1)}%)` : '';
+                            const tagRow = document.createElement('div');
+                            tagRow.style.display = 'flex';
+                            tagRow.style.justifyContent = 'space-between';
+                            tagRow.style.alignItems = 'center';
+                            tagRow.style.fontSize = '0.95em';
+                            tagRow.innerHTML = `<span style="color: var(--text-secondary);">• ${tag}${percentage}</span><span class="amount">${formatCurrency(tagTotals[tag])}</span>`;
+                            tagList.appendChild(tagRow);
+                        });
+                        legendContainer.appendChild(tagList);
+                    }
+                    else {
+                        item.style.marginBottom = '0.75rem';
+                    }
+                }
+                else {
+                    item.style.marginBottom = '0.75rem';
+                }
             });
 
             const activeTotalExpenses = dateFilteredExpenses

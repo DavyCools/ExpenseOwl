@@ -7,6 +7,18 @@ let allTags = new Set();
 let selectedTags = new Set();
 let timeRangeSelected = 'month';
 
+
+
+// Filter state
+let tableFilters = {
+    name: '',
+    category: '',
+    tags: '',
+    amount: '',
+    date: ''
+};
+
+
 function createTable(expenses) {
     if (!expenses || expenses.length === 0) {
         const message = document.getElementById('showAllToggle').checked ? 
@@ -14,7 +26,17 @@ function createTable(expenses) {
                         'No expenses recorded for this ' + timeRangeSelected;
         return `<div class="no-data">${message}</div>`;
     }
-    const hasTags = expenses.some(exp => exp.tags && exp.tags.length > 0);
+    // Use the global expensesForTable to determine if tags column should be shown
+    const hasTags = expensesForTable.some(exp => exp.tags && exp.tags.length > 0);
+    // Filter row in table header, with correct input types
+    let filterRow = `<tr class="filter-row">
+        <th><input type="text" id="filter-name" class="form-filter-input" placeholder="Filter" value="${tableFilters.name || ''}"></th>
+        <th><input type="text" id="filter-category" class="form-filter-input" placeholder="Filter" value="${tableFilters.category || ''}"></th>
+        ${hasTags ? '<th class="tags-column"><input type="text" id="filter-tags" class="form-filter-input" placeholder="Filter" value="' + (tableFilters.tags || '') + '"></th>' : ''}
+        <th><input type="number" id="filter-amount" class="form-filter-input" placeholder="Filter" value="${tableFilters.amount || ''}"></th>
+        <th class="date-header"><input type="date" id="filter-date" class="form-filter-input" placeholder="Filter" value="${tableFilters.date || ''}"></th>
+        <th></th>
+    </tr>`;
     return `
         <table class="expense-table">
             <thead>
@@ -26,8 +48,9 @@ function createTable(expenses) {
                     <th class="date-header">Date</th>
                     <th></th>
                 </tr>
+                ${filterRow}
             </thead>
-            <tbody>
+            <tbody id="expense-table-body">
                 ${expenses.map((expense, index) => `
                     <tr>
                         <td>${escapeHTML(expense.name)}</td>
@@ -45,10 +68,53 @@ function createTable(expenses) {
                         </td>
                     </tr>
                 `).join('')}
+                ${expenses.length === 0 ? `<tr><td colspan="${hasTags ? 6 : 5}" class="no-data">No transactions found with current filters.</td></tr>` : ''}
             </tbody>
         </table>
     `;
 }
+
+function filterExpenses(expenses) {
+    return expenses.filter(exp => {
+        // Name
+        if (tableFilters.name && !exp.name.toLowerCase().includes(tableFilters.name.toLowerCase())) return false;
+        // Category
+        if (tableFilters.category && !exp.category.toLowerCase().includes(tableFilters.category.toLowerCase())) return false;
+        // Tags
+        if (tableFilters.tags) {
+            const tagsStr = (exp.tags || []).join(', ').toLowerCase();
+            if (!tagsStr.includes(tableFilters.tags.toLowerCase())) return false;
+        }
+        // Amount
+        if (tableFilters.amount) {
+            // Remove all non-digit/decimal chars for comparison
+            const normalize = str => str.replace(/[^\d.\-]/g, '');
+            const amtRaw = String(Math.abs(exp.amount));
+            const amtNormalized = normalize(amtRaw);
+            const amtFormatted = normalize(formatCurrency(exp.amount));
+            const filterVal = normalize(tableFilters.amount);
+            // If filter is a valid number, require exact match
+            if (filterVal !== '' && !isNaN(filterVal)) {
+                if (Number(amtNormalized) !== Number(filterVal)) return false;
+            } else {
+                // Fallback to string includes for non-numeric input
+                if (!amtFormatted.includes(filterVal) && !amtRaw.includes(filterVal)) return false;
+            }
+        }
+        // Date
+        if (tableFilters.date) {
+            const dateString = formatDateFromUTC(exp.date);
+            // tableFilters.date is in format YYYY-MM-DD, 
+            // dateString is in format DD/MM/YYYY
+            const [year, month, day] = tableFilters.date.split('-');
+            const formattedFilterDate = `${day}/${month}/${year}`;
+            if (!formattedFilterDate.includes(dateString)) return false;
+        }
+        return true;
+    });
+}
+
+
 
 function updateTable() {
     const showAll = document.getElementById('showAllToggle').checked;
@@ -76,9 +142,51 @@ function updateTable() {
     } else {
         expensesForTable = allExpenses.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
     }
-    
+
+    // Apply filters
+    const filtered = filterExpenses(expensesForTable);
     const tableContainer = document.getElementById('tableContainer');
-    tableContainer.innerHTML = createTable(expensesForTable);
+    tableContainer.innerHTML = createTable(filtered);
+
+    // Add filter input listeners (after table is rendered)
+    const nameInput = document.getElementById('filter-name');
+    if (nameInput) nameInput.addEventListener('input', e => { tableFilters.name = e.target.value; updateTableBody(); });
+    const categoryInput = document.getElementById('filter-category');
+    if (categoryInput) categoryInput.addEventListener('input', e => { tableFilters.category = e.target.value; updateTableBody(); });
+    const tagsInput = document.getElementById('filter-tags');
+    if (tagsInput) tagsInput.addEventListener('input', e => { tableFilters.tags = e.target.value; updateTableBody(); });
+    const amountInput = document.getElementById('filter-amount');
+    if (amountInput) amountInput.addEventListener('input', e => { tableFilters.amount = e.target.value; updateTableBody(); });
+    const dateInput = document.getElementById('filter-date');
+    if (dateInput) dateInput.addEventListener('input', e => { tableFilters.date = e.target.value; updateTableBody(); });
+}
+
+function updateTableBody() {
+    // Only update tbody, not thead/inputs
+    const filtered = filterExpenses(expensesForTable);
+    const hasTags = expensesForTable.some(exp => exp.tags && exp.tags.length > 0);
+    const tbody = document.getElementById('expense-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = filtered.map((expense, index) => `
+        <tr>
+            <td>${escapeHTML(expense.name)}</td>
+            <td>${escapeHTML(expense.category)}</td>
+            ${hasTags ? `<td class="tags-column">${(expense.tags || []).map(escapeHTML).join(', ')}</td>` : ''}
+            <td class="amount">${formatCurrency(expense.amount)}</td>
+            <td class="date-column">${formatDateFromUTC(expense.date)}</td>
+            <td>
+                <button class="edit-button" onclick="editExpenseByIndex(${index})">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="delete-button" onclick="handleDeleteClick(event, '${expense.id}')">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${hasTags ? 6 : 5}" class="no-data" style="text-align:center;">No transactions found with current filters.</td></tr>`;
+    }
 }
 
 function editExpenseByIndex(index) {
@@ -243,6 +351,7 @@ document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
     radio.addEventListener('change', function() {
         if (this.checked) {
             timeRangeSelected = this.value;
+            clearTableFilters();
             updateTable();
         }
     });
@@ -252,26 +361,33 @@ document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
 document.getElementById('prevMonth').addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     updateMonthDisplay();
+    clearTableFilters();
     updateTable();
 });
 
 document.getElementById('nextMonth').addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     updateMonthDisplay();
+    clearTableFilters();
     updateTable();
 });
 
 document.getElementById('prevYear').addEventListener('click', () => {
     currentDate.setFullYear(currentDate.getFullYear() - 1);
     updateYearDisplay();
+    clearTableFilters();
     updateTable();
 });
 
 document.getElementById('nextYear').addEventListener('click', () => {
     currentDate.setFullYear(currentDate.getFullYear() + 1);
     updateYearDisplay();
+    clearTableFilters();
     updateTable();
 });
+function clearTableFilters() {
+    tableFilters = { name: '', category: '', tags: '', amount: '', date: '' };
+}
 
 let expenseToDelete = null;
 

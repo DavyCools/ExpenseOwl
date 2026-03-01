@@ -1,3 +1,19 @@
+/* Table filter input styling to match Add Expense form */
+.form-filter-input {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 90%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.form-filter-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
 :root {
     /* Default theme: Dark mode */
     --bg-primary: #081528;
@@ -256,10 +272,12 @@ header {
 
 .expense-table {
     width: 100%;
-    border-collapse: collapse;
-    background-color: var(--bg-secondary);
+    border-collapse: separate;
     border-radius: 8px;
+    border-spacing: 0;
+    border: 1px solid var(--border);
     overflow: hidden;
+    background: none;
 }
 
 .expense-table th,
@@ -267,6 +285,7 @@ header {
     padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid var(--border);
+    background-color: var(--bg-secondary);
 }
 
 .expense-table th {

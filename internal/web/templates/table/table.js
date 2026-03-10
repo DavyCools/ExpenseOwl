@@ -314,6 +314,10 @@ function setupTagInput() {
 
 async function initialize() {
     try {
+        document.getElementById('showAllToggle').checked = false;
+        document.getElementById('showYearToggle').checked = false;
+        document.getElementById('showMonthToggle').checked = true;
+        
         const configResponse = await fetch('/config');
         if (!configResponse.ok) throw new Error('Failed to fetch configuration');
         const config = await configResponse.json();

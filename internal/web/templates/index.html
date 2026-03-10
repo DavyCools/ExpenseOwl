@@ -354,8 +354,9 @@
                 if (dataB) return 1;
                 return a.localeCompare(b);
             }).forEach(category => {
+                const isDisabledCategory = disabledCategories.has(category);
                 const item = document.createElement('div');
-                item.className = `legend-item${disabledCategories.has(category) ? ' disabled' : ''}`;
+                item.className = `legend-item${isDisabledCategory ? ' disabled' : ''}`;
                 const color = categoryColors[category];
                 const categoryDataItem = categoryMap.get(category);
                 const percentage = categoryDataItem ? ` (${categoryDataItem.percentage.toFixed(1)}%)` : '';
@@ -387,19 +388,22 @@
                         // Sort tags by total descending
                         tagNames.sort((a, b) => tagTotals[b] - tagTotals[a]);
                         const tagList = document.createElement('div');
-                        tagList.style.marginLeft = '2.5rem';
-                        tagList.style.marginTop = '0rem';
-                        tagList.style.marginBottom = '0.5rem';
-                        tagList.style.display = 'flex';
-                        tagList.style.flexDirection = 'column';
+                        if (isDisabledCategory) {
+                            tagList.className = 'legend-item-tag disabled';
+                        }
+                        else {
+                            tagList.className = 'legend-item-tag';
+                        }
+
                         tagNames.forEach(tag => {
-                            const percentage = categoryDataItem && categoryDataItem.total > 0 ? ` (${((tagTotals[tag] / categoryDataItem.total) * 100).toFixed(1)}%)` : '';
+                            const percentage = !isDisabledCategory && categoryDataItem && categoryDataItem.total > 0 ? ` (${((tagTotals[tag] / categoryDataItem.total) * 100).toFixed(1)}%)` : '';
                             const tagRow = document.createElement('div');
-                            tagRow.style.display = 'flex';
-                            tagRow.style.justifyContent = 'space-between';
-                            tagRow.style.alignItems = 'center';
-                            tagRow.style.fontSize = '0.95em';
-                            tagRow.innerHTML = `<span style="color: var(--text-secondary);">• ${tag}${percentage}</span><span class="amount">${formatCurrency(tagTotals[tag])}</span>`;
+                            tagRow.innerHTML = ` 
+                                <div class="legend-text-tag">
+                                    <span>• ${tag}${percentage}</span>
+                                    <span class="amount">${!isDisabledCategory ? formatCurrency(tagTotals[tag]) : ''}</span>
+                                </div>
+                            `;
                             tagList.appendChild(tagRow);
                         });
                         legendContainer.appendChild(tagList);

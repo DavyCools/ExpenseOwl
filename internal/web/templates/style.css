@@ -172,8 +172,16 @@ header {
     font-weight: bold;
 }
 
-.legend-item.disabled .legend-text {
+.legend-item.disabled .legend-text, .legend-item-tag.disabled {
     opacity: 0.5;
+}
+
+.legend-item-tag {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2.5rem;
+    margin-top: 0rem;
+    margin-bottom: 0.5rem;
 }
 
 .color-box {
@@ -196,6 +204,14 @@ header {
     display: flex;
     justify-content: space-between;
     flex: 1;
+}
+
+.legend-text-tag {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    font-size: 0.95em;
+    color: var(--text-secondary);
 }
 
 .amount {

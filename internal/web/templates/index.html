@@ -459,7 +459,6 @@
                             if (expenseAmount > 0 && gainAmount > 0) {
                                 let digitCount = Math.floor(Math.log10(Math.abs(totalTagAmount))) + 1;
                                 let spaces = Math.max(1, 6 - digitCount);
-                                console.log(tagAmountDisplay);
                                 if (tagAmountDisplay.includes('-')){
                                     spaces -= 1;
                                 }
@@ -501,7 +500,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Total:</span>
                         <span class="amount">
-                            ${formatCurrency(activeNetTotal)}
+                            ${activeTotalExpenses > 0 && activeTotalGains > 0 ? `(${formatCurrency(activeTotalExpenses)} • <span style="color: #86efac;">${formatCurrency(activeTotalGains)}</span>) ` : ''}${formatCurrency(activeNetTotal)}
                         </span>
                     </div>
                 </div>

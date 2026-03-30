@@ -399,7 +399,12 @@
                 
                 let amountDisplay = categoryDataItem ? formatCurrency(totalAmount) : '';
                 if (expenses > 0 && gains > 0) {
-                    amountDisplay += ` (${formatCurrency(expenses)} • <span style="color: #86efac;">${formatCurrency(gains)}</span>)`;
+                    let digitCount = Math.floor(Math.log10(Math.abs(totalAmount))) + 1;
+                    let spaces = Math.max(0, 5 - digitCount);
+                    if (amountDisplay.includes('-')){
+                        spaces -= 1;
+                    }
+                    amountDisplay = `(${formatCurrency(expenses)} • <span style="color: #86efac;">${formatCurrency(gains)}</span>)` + '&nbsp;'.repeat(spaces) + amountDisplay;
                 }
                 
                 item.innerHTML = `
@@ -452,7 +457,13 @@
                             
                             let tagAmountDisplay = formatCurrency(totalTagAmount);
                             if (expenseAmount > 0 && gainAmount > 0) {
-                                tagAmountDisplay += ` (${formatCurrency(expenseAmount)} • <span style="color: #86efac;">${formatCurrency(gainAmount)}</span>)`;
+                                let digitCount = Math.floor(Math.log10(Math.abs(totalTagAmount))) + 1;
+                                let spaces = Math.max(1, 6 - digitCount);
+                                console.log(tagAmountDisplay);
+                                if (tagAmountDisplay.includes('-')){
+                                    spaces -= 1;
+                                }
+                                tagAmountDisplay = `(${formatCurrency(expenseAmount)} • <span style="color: #86efac;">${formatCurrency(gainAmount)}</span>)` + '&nbsp;'.repeat(spaces) + tagAmountDisplay;
                             }
                             
                             const tagRow = document.createElement('div');

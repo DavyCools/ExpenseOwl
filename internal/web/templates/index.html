@@ -398,8 +398,8 @@
                 const percentage = categoryDataItem ? ` (${categoryDataItem.percentage.toFixed(1)}%)` : '';
                 
                 let amountDisplay = categoryDataItem ? formatCurrency(totalAmount) : '';
-                if (gains > 0) {
-                    amountDisplay += ` (${formatCurrency(expenses)} - ${formatCurrency(gains)})`;
+                if (expenses > 0 && gains > 0) {
+                    amountDisplay += ` (${formatCurrency(expenses)} • <span style="color: #86efac;">${formatCurrency(gains)}</span>)`;
                 }
                 
                 item.innerHTML = `
@@ -451,8 +451,8 @@
                             const percentage = !isDisabledCategory && categoryDataItem && totalAmount > 0 ? ` (${((totalTagAmount / totalAmount) * 100).toFixed(1)}%)` : '';
                             
                             let tagAmountDisplay = formatCurrency(totalTagAmount);
-                            if (gainAmount > 0) {
-                                tagAmountDisplay += ` (${formatCurrency(expenseAmount)} - ${formatCurrency(gainAmount)})`;
+                            if (expenseAmount > 0 && gainAmount > 0) {
+                                tagAmountDisplay += ` (${formatCurrency(expenseAmount)} • <span style="color: #86efac;">${formatCurrency(gainAmount)}</span>)`;
                             }
                             
                             const tagRow = document.createElement('div');

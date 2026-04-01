@@ -173,21 +173,41 @@
 
         function calculateCategoryBreakdown(expenses) {
             const categoryTotals = {};
-            let totalAmount = 0;
+            const categoryGains = {};
+            let totalExpenses = 0;
+            let totalGains = 0;
+            
             expenses.forEach(exp => {
-                if (exp.amount < 0 && !disabledCategories.has(exp.category)) {
-                    const amount = Math.abs(exp.amount);
-                    categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + amount;
-                    totalAmount += amount;
+                if (!disabledCategories.has(exp.category)) {
+                    if (exp.amount < 0) {
+                        const amount = Math.abs(exp.amount);
+                        categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + amount;
+                        totalExpenses += amount;
+                    } else if (exp.amount > 0) {
+                        categoryGains[exp.category] = (categoryGains[exp.category] || 0) + exp.amount;
+                        totalGains += exp.amount;
+                    }
                 }
             });
+            
             return Object.entries(categoryTotals)
                 .map(([category, total]) => ({
                     category,
-                    total,
-                    percentage: totalAmount > 0 ? (total / totalAmount) * 100 : 0
+                    expenses: total,
+                    gains: categoryGains[category] || 0,
+                    total: total,
+                    percentage: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0
                 }))
-                .sort((a, b) => b.total - a.total);
+                .concat(Object.entries(categoryGains)
+                    .filter(([cat, _]) => !categoryTotals[cat])
+                    .map(([category, gains]) => ({
+                        category,
+                        expenses: 0,
+                        gains: gains,
+                        total: 0,
+                        percentage: 0
+                    })))
+                .sort((a, b) => (b.expenses - b.gains) - (a.expenses - a.gains));
         }
 
         function calculateIncome(expenses) {
@@ -235,8 +255,8 @@
             const legendBox = document.getElementById('customLegend');
             const cashflowSection = document.getElementById('cashflow-section');
             const noDataMessage = document.getElementById('noDataMessage');
-            const hasExpenses = dateFilteredExpenses.some(e => e.amount < 0);
-            if (!hasExpenses) {
+            const hasExpensesOrGains = dateFilteredExpenses.some(e => e.amount !== 0);
+            if (!hasExpensesOrGains) {
                 if (pieChart) {
                     pieChart.destroy();
                     pieChart = null;
@@ -279,13 +299,27 @@
 
         function createPieChart(categoryData) {
             if (pieChart) pieChart.destroy();
+            
+            const labels = [];
+            const dataValues = [];
+            const backgroundColors = [];
+            
+            categoryData.forEach(cat => {
+                const total = cat.expenses - cat.gains;
+                if (total > 0) {
+                    labels.push(cat.category);
+                    dataValues.push(total);
+                    backgroundColors.push(categoryColors[cat.category]);
+                }
+            });
+            
             pieChart = new Chart('categoryPieChart', {
                 type: 'doughnut',
                 data: {
-                    labels: categoryData.map(c => c.category),
+                    labels: labels,
                     datasets: [{
-                        data: categoryData.map(c => c.total),
-                        backgroundColor: categoryData.map(c => categoryColors[c.category]),
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
                         borderColor: '#1a1a1a',
                         borderWidth: 1
                     }]
@@ -342,14 +376,13 @@
             legendContainer.appendChild(toggleDiv);
             const dateFilteredExpenses = getExpenses(allExpenses, timeRangeSelected);
             const currentDateCategories = [...new Set(dateFilteredExpenses
-                .filter(exp => exp.amount < 0)
                 .map(exp => exp.category))];
             const categoryMap = new Map(categoryData.map(cat => [cat.category, cat]));
             
             currentDateCategories.sort((a, b) => {
                 const dataA = categoryMap.get(a);
                 const dataB = categoryMap.get(b);
-                if (dataA && dataB) return dataB.total - dataA.total;
+                if (dataA && dataB) return (dataB.expenses - dataB.gains) - (dataA.expenses - dataA.gains);
                 if (dataA) return -1;
                 if (dataB) return 1;
                 return a.localeCompare(b);
@@ -359,13 +392,26 @@
                 item.className = `legend-item${isDisabledCategory ? ' disabled' : ''}`;
                 const color = categoryColors[category];
                 const categoryDataItem = categoryMap.get(category);
+                const expenses = categoryDataItem ? categoryDataItem.expenses : 0;
+                const gains = categoryDataItem ? categoryDataItem.gains : 0;
+                const totalAmount = expenses - gains;
                 const percentage = categoryDataItem ? ` (${categoryDataItem.percentage.toFixed(1)}%)` : '';
-                const amount = categoryDataItem ? formatCurrency(categoryDataItem.total) : '';
+                
+                let amountDisplay = categoryDataItem ? formatCurrency(totalAmount) : '';
+                if (expenses > 0 && gains > 0) {
+                    let digitCount = Math.floor(Math.log10(Math.abs(totalAmount))) + 1;
+                    let spaces = Math.max(0, 5 - digitCount);
+                    if (amountDisplay.includes('-')){
+                        spaces -= 1;
+                    }
+                    amountDisplay = `(${formatCurrency(expenses)} • <span style="color: #86efac;">${formatCurrency(gains)}</span>)` + '&nbsp;'.repeat(spaces) + amountDisplay;
+                }
+                
                 item.innerHTML = `
                     <div class="color-box" style="background-color: ${color}"></div>
                     <div class="legend-text">
                         <span>${category}${percentage}</span>
-                        <span class="amount">${amount}</span>
+                        <span class="amount">${amountDisplay}</span>
                     </div>
                 `;
                 item.addEventListener('click', () => toggleCategory(category));
@@ -373,20 +419,28 @@
 
                 if (showTagsBool) {
                     // --- TAGS UNDER CATEGORY ---
-                    // Get all tags for this category in the filtered expenses
                     const tagTotals = {};
+                    const tagGains = {};
                     dateFilteredExpenses
-                        .filter(exp => exp.amount < 0 && exp.category === category && Array.isArray(exp.tags))
+                        .filter(exp => exp.category === category && Array.isArray(exp.tags))
                         .forEach(exp => {
                             exp.tags.forEach(tag => {
-                                if (!tagTotals[tag]) tagTotals[tag] = 0;
-                                tagTotals[tag] += Math.abs(exp.amount);
+                                if (exp.amount < 0) {
+                                    if (!tagTotals[tag]) tagTotals[tag] = 0;
+                                    tagTotals[tag] += Math.abs(exp.amount);
+                                } else if (exp.amount > 0) {
+                                    if (!tagGains[tag]) tagGains[tag] = 0;
+                                    tagGains[tag] += exp.amount;
+                                }
                             });
                         });
-                    const tagNames = Object.keys(tagTotals);
+                    const tagNames = Object.keys(tagTotals).concat(Object.keys(tagGains).filter(t => !tagTotals[t]));
                     if (tagNames.length > 0) {
-                        // Sort tags by total descending
-                        tagNames.sort((a, b) => tagTotals[b] - tagTotals[a]);
+                        tagNames.sort((a, b) => {
+                            const totalA = (tagTotals[a] || 0) - (tagGains[a] || 0);
+                            const totalB = (tagTotals[b] || 0) - (tagGains[b] || 0);
+                            return totalB - totalA;
+                        });
                         const tagList = document.createElement('div');
                         if (isDisabledCategory) {
                             tagList.className = 'legend-item-tag disabled';
@@ -396,12 +450,26 @@
                         }
 
                         tagNames.forEach(tag => {
-                            const percentage = !isDisabledCategory && categoryDataItem && categoryDataItem.total > 0 ? ` (${((tagTotals[tag] / categoryDataItem.total) * 100).toFixed(1)}%)` : '';
+                            const expenseAmount = tagTotals[tag] || 0;
+                            const gainAmount = tagGains[tag] || 0;
+                            const totalTagAmount = expenseAmount - gainAmount;
+                            const percentage = !isDisabledCategory && categoryDataItem && totalAmount > 0 ? ` (${((totalTagAmount / totalAmount) * 100).toFixed(1)}%)` : '';
+                            
+                            let tagAmountDisplay = formatCurrency(totalTagAmount);
+                            if (expenseAmount > 0 && gainAmount > 0) {
+                                let digitCount = Math.floor(Math.log10(Math.abs(totalTagAmount))) + 1;
+                                let spaces = Math.max(1, 6 - digitCount);
+                                if (tagAmountDisplay.includes('-')){
+                                    spaces -= 1;
+                                }
+                                tagAmountDisplay = `(${formatCurrency(expenseAmount)} • <span style="color: #86efac;">${formatCurrency(gainAmount)}</span>)` + '&nbsp;'.repeat(spaces) + tagAmountDisplay;
+                            }
+                            
                             const tagRow = document.createElement('div');
                             tagRow.innerHTML = ` 
                                 <div class="legend-text-tag">
                                     <span>• ${tag}${percentage}</span>
-                                    <span class="amount">${!isDisabledCategory ? formatCurrency(tagTotals[tag]) : ''}</span>
+                                    <span class="amount">${!isDisabledCategory ? tagAmountDisplay : ''}</span>
                                 </div>
                             `;
                             tagList.appendChild(tagRow);
@@ -420,13 +488,19 @@
             const activeTotalExpenses = dateFilteredExpenses
                 .filter(exp => exp.amount < 0 && !disabledCategories.has(exp.category))
                 .reduce((sum, exp) => sum + Math.abs(exp.amount), 0);
+            
+            const activeTotalGains = dateFilteredExpenses
+                .filter(exp => exp.amount > 0 && !disabledCategories.has(exp.category))
+                .reduce((sum, exp) => sum + exp.amount, 0);
+            
+            const activeNetTotal = activeTotalExpenses - activeTotalGains;
 
             const totalsHtml = `
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Total:</span>
                         <span class="amount">
-                            ${formatCurrency(activeTotalExpenses)}
+                            ${activeTotalExpenses > 0 && activeTotalGains > 0 ? `(${formatCurrency(activeTotalExpenses)} • <span style="color: #86efac;">${formatCurrency(activeTotalGains)}</span>) ` : ''}${formatCurrency(activeNetTotal)}
                         </span>
                     </div>
                 </div>

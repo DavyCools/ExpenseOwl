@@ -7,19 +7,22 @@ let allTags = new Set();
 let selectedTags = new Set();
 let timeRangeSelected = 'month';
 
-
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
+}
 
 // Filter state
 let tableFilters = {
     name: '',
-    category: '',
-    tags: '',
+    category: [],
+    tags: [],
     amount: '',
     date: ''
 };
 
 
-function createTable(expenses) {
+function createTable(expenses, categoryOptions, tagOptions) {
     if (!expenses || expenses.length === 0) {
         const message = document.getElementById('showAllToggle').checked ? 
                         'No transactions found' : 
@@ -28,13 +31,28 @@ function createTable(expenses) {
     }
     // Use the global expensesForTable to determine if tags column should be shown
     const hasTags = expensesForTable.some(exp => exp.tags && exp.tags.length > 0);
-    // Filter row in table header, with correct input types
+
+    const categorySelect = `<div class="custom-multiselect" id="filter-category-container">
+        <div class="multiselect-display" id="filter-category-display">${tableFilters.category.length > 0 ? truncateText(tableFilters.category.join(', '), 20) : 'All categories'}</div>
+        <div class="multiselect-dropdown" id="filter-category-dropdown" style="display: none;">
+            ${categoryOptions.map(cat => `<label class="multiselect-option"><input type="checkbox" value="${escapeHTML(cat)}"${tableFilters.category.includes(cat) ? ' checked' : ''}> ${escapeHTML(cat)}</label>`).join('')}
+        </div>
+    </div>`;
+
+    const tagsSelect = `<div class="custom-multiselect" id="filter-tags-container">
+        <div class="multiselect-display" id="filter-tags-display">${tableFilters.tags.length > 0 ? truncateText(tableFilters.tags.join(', '), 20) : 'All tags'}</div>
+        <div class="multiselect-dropdown" id="filter-tags-dropdown" style="display: none;">
+            ${tagOptions.map(tag => `<label class="multiselect-option"><input type="checkbox" value="${escapeHTML(tag)}"${tableFilters.tags.includes(tag) ? ' checked' : ''}> ${escapeHTML(tag)}</label>`).join('')}
+        </div>
+    </div>`;
+
+    // Filter row in table header, with multiselect category/tags.
     let filterRow = `<tr class="filter-row">
-        <th><input type="text" id="filter-name" class="form-filter-input" placeholder="Filter" value="${tableFilters.name || ''}"></th>
-        <th><input type="text" id="filter-category" class="form-filter-input" placeholder="Filter" value="${tableFilters.category || ''}"></th>
-        ${hasTags ? '<th class="tags-column"><input type="text" id="filter-tags" class="form-filter-input" placeholder="Filter" value="' + (tableFilters.tags || '') + '"></th>' : ''}
-        <th><input type="number" id="filter-amount" class="form-filter-input" placeholder="Filter" value="${tableFilters.amount || ''}"></th>
-        <th class="date-header"><input type="date" id="filter-date" class="form-filter-input" placeholder="Filter" value="${tableFilters.date || ''}"></th>
+        <th><input type="text" id="filter-name" class="form-filter-input" placeholder="Filter" value="${escapeHTML(tableFilters.name || '')}"></th>
+        <th>${categorySelect}</th>
+        ${hasTags ? `<th class="tags-column">${tagsSelect}</th>` : ''}
+        <th><input type="number" id="filter-amount" class="form-filter-input" placeholder="Filter" value="${escapeHTML(tableFilters.amount || '')}"></th>
+        <th class="date-header"><input type="date" id="filter-date" class="form-filter-input" placeholder="Filter" value="${escapeHTML(tableFilters.date || '')}"></th>
         <th></th>
     </tr>`;
     return `
@@ -79,11 +97,11 @@ function filterExpenses(expenses) {
         // Name
         if (tableFilters.name && !exp.name.toLowerCase().includes(tableFilters.name.toLowerCase())) return false;
         // Category
-        if (tableFilters.category && !exp.category.toLowerCase().includes(tableFilters.category.toLowerCase())) return false;
+        if (tableFilters.category.length > 0 && !tableFilters.category.includes(exp.category)) return false;
         // Tags
-        if (tableFilters.tags) {
-            const tagsStr = (exp.tags || []).join(', ').toLowerCase();
-            if (!tagsStr.includes(tableFilters.tags.toLowerCase())) return false;
+        if (tableFilters.tags.length > 0) {
+            const expTags = (exp.tags || []);
+            if (!expTags.some(tag => tableFilters.tags.includes(tag))) return false;
         }
         // Amount
         if (tableFilters.amount) {
@@ -143,22 +161,65 @@ function updateTable() {
         expensesForTable = allExpenses.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
     }
 
+    const categoryOptions = [...new Set(expensesForTable.map(exp => exp.category).filter(Boolean))].sort();
+    const tagOptions = [...new Set(expensesForTable.flatMap(exp => exp.tags || []))].sort();
+
     // Apply filters
     const filtered = filterExpenses(expensesForTable);
     const tableContainer = document.getElementById('tableContainer');
-    tableContainer.innerHTML = createTable(filtered);
+    tableContainer.innerHTML = createTable(filtered, categoryOptions, tagOptions);
 
     // Add filter input listeners (after table is rendered)
     const nameInput = document.getElementById('filter-name');
     if (nameInput) nameInput.addEventListener('input', e => { tableFilters.name = e.target.value; updateTableBody(); });
-    const categoryInput = document.getElementById('filter-category');
-    if (categoryInput) categoryInput.addEventListener('input', e => { tableFilters.category = e.target.value; updateTableBody(); });
-    const tagsInput = document.getElementById('filter-tags');
-    if (tagsInput) tagsInput.addEventListener('input', e => { tableFilters.tags = e.target.value; updateTableBody(); });
+
+    // Custom multiselect for categories
+    const categoryDisplay = document.getElementById('filter-category-display');
+    const categoryDropdown = document.getElementById('filter-category-dropdown');
+    if (categoryDisplay && categoryDropdown) {
+        categoryDisplay.addEventListener('click', () => {
+            categoryDropdown.style.display = categoryDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+        categoryDropdown.addEventListener('click', e => e.stopPropagation()); // Prevent closing when clicking inside
+        categoryDropdown.addEventListener('change', e => {
+            if (e.target.type === 'checkbox') {
+                tableFilters.category = Array.from(categoryDropdown.querySelectorAll('input:checked')).map(cb => cb.value);
+                categoryDisplay.textContent = tableFilters.category.length > 0 ? truncateText(tableFilters.category.join(', '), 20) : 'All categories';
+                updateTableBody();
+            }
+        });
+    }
+
+    // Custom multiselect for tags
+    const tagsDisplay = document.getElementById('filter-tags-display');
+    const tagsDropdown = document.getElementById('filter-tags-dropdown');
+    if (tagsDisplay && tagsDropdown) {
+        tagsDisplay.addEventListener('click', () => {
+            tagsDropdown.style.display = tagsDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+        tagsDropdown.addEventListener('click', e => e.stopPropagation()); // Prevent closing when clicking inside
+        tagsDropdown.addEventListener('change', e => {
+            if (e.target.type === 'checkbox') {
+                tableFilters.tags = Array.from(tagsDropdown.querySelectorAll('input:checked')).map(cb => cb.value);
+                tagsDisplay.textContent = tableFilters.tags.length > 0 ? truncateText(tableFilters.tags.join(', '), 20) : 'All tags';
+                updateTableBody();
+            }
+        });
+    }
+
     const amountInput = document.getElementById('filter-amount');
     if (amountInput) amountInput.addEventListener('input', e => { tableFilters.amount = e.target.value; updateTableBody(); });
     const dateInput = document.getElementById('filter-date');
     if (dateInput) dateInput.addEventListener('input', e => { tableFilters.date = e.target.value; updateTableBody(); });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.custom-multiselect')) {
+            document.querySelectorAll('.multiselect-dropdown').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        }
+    });
 }
 
 function updateTableBody() {
@@ -390,7 +451,7 @@ document.getElementById('nextYear').addEventListener('click', () => {
     updateTable();
 });
 function clearTableFilters() {
-    tableFilters = { name: '', category: '', tags: '', amount: '', date: '' };
+    tableFilters = { name: '', category: [], tags: [], amount: '', date: '' };
 }
 
 let expenseToDelete = null;

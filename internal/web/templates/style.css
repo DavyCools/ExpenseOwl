@@ -1,3 +1,5 @@
+@import "multiselect.css";
+
 /* Table filter input styling to match Add Expense form */
 .form-filter-input {
     padding: 0.5rem;
@@ -292,7 +294,6 @@ header {
     border-radius: 8px;
     border-spacing: 0;
     border: 1px solid var(--border);
-    overflow: hidden;
     background: none;
 }
 

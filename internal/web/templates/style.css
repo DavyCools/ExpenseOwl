@@ -974,6 +974,74 @@ header {
     background-color: var(--accent);
 }
 
+.transaction-visibility {
+    display: flex;
+    justify-content: center;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+}
+
+.transaction-visibility label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.transaction-visibility input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    margin: 0;
+}
+
+.future-switch-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 1.125rem;
+    border: 1px solid var(--text-secondary);
+    border-radius: 9999px;
+    background-color: var(--bg-secondary);
+}
+
+.future-switch-track::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0.125rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background-color: var(--text-secondary);
+}
+
+.future-switch input:checked + .future-switch-track {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.future-switch input:checked + .future-switch-track::before {
+    left: calc(100% - 0.125rem - 0.75rem);
+    background-color: var(--text-primary);
+}
+
+.future-switch input:focus-visible + .future-switch-track {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
+}
+
+.transaction-visibility label:hover,
+.transaction-visibility label:focus-within {
+    color: var(--text-primary);
+}
+
 .pointer {
     cursor: pointer;
 }

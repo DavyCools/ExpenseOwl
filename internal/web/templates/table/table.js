@@ -24,7 +24,9 @@ function createTable(expenses) {
         const message = document.getElementById('showAllToggle').checked ? 
                         'No transactions found' : 
                         'No expenses recorded for this ' + timeRangeSelected;
-        return `<div class="no-data">${message}</div>`;
+        const futureMessage = document.getElementById('includeFutureToggle').checked ? '' :
+            ' Future transactions are hidden. Enable "Future transactions" to show them.';
+        return `<div class="no-data">${message}${futureMessage}</div>`;
     }
     // Use the global expensesForTable to determine if tags column should be shown
     const hasTags = expensesForTable.some(exp => exp.tags && exp.tags.length > 0);
@@ -137,11 +139,9 @@ function updateTable() {
             const year = parseInt(document.getElementById('currentYear').innerText);
             currentDate.setFullYear(year);
         }
-
-        expensesForTable = getExpenses(allExpenses, timeRangeSelected);
-    } else {
-        expensesForTable = allExpenses.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
     }
+    expensesForTable = getExpenses(allExpenses, timeRangeSelected,
+        document.getElementById('includeFutureToggle').checked);
 
     // Apply filters
     const filtered = filterExpenses(expensesForTable);
@@ -348,6 +348,9 @@ async function initialize() {
             '<div class="no-data">Failed to load expenses</div>';
     }
 }
+
+document.getElementById('includeFutureToggle').checked = false;
+document.getElementById('includeFutureToggle').addEventListener('change', updateTable);
 
 document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
     radio.addEventListener('change', function() {

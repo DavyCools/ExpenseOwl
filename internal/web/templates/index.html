@@ -69,6 +69,14 @@
             <button id="nextYear" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
         </div>
 
+        <div class="transaction-visibility">
+            <label class="future-switch">
+                <input type="checkbox" id="includeFutureToggle" role="switch" autocomplete="off">
+                <span class="future-switch-track" aria-hidden="true"></span>
+                <span>Future transactions</span>
+            </label>
+        </div>
+
         <div class="table-controls">
             <button id="toggleExpenseFormBtn" class="nav-button"><i class="fa-solid fa-plus"></i> Add Expense</button>
         </div>
@@ -243,18 +251,18 @@
                     const year = parseInt(document.getElementById('currentYear').innerText);
                     currentDate.setFullYear(year);
                 }
-
-                expensesForTable = getExpenses(allExpenses, timeRangeSelected);
-            } else {
-                expensesForTable = allExpenses.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
             }
 
-
-            const dateFilteredExpenses = getExpenses(allExpenses, timeRangeSelected);
+            const includeFuture = document.getElementById('includeFutureToggle').checked;
+            const dateFilteredExpenses = getExpenses(allExpenses, timeRangeSelected, includeFuture);
             const chartBox = document.querySelector('.chart-box');
             const legendBox = document.getElementById('customLegend');
             const cashflowSection = document.getElementById('cashflow-section');
             const noDataMessage = document.getElementById('noDataMessage');
+            noDataMessage.textContent = 'No expenses recorded this time period.' +
+                (includeFuture ? '' : ' Future transactions are hidden. Enable "Future transactions" to show them.');
+            updateCashflow(dateFilteredExpenses);
+            cashflowSection.style.display = dateFilteredExpenses.length > 0 ? 'flex' : 'none';
             const hasExpensesOrGains = dateFilteredExpenses.some(e => e.amount !== 0);
             if (!hasExpensesOrGains) {
                 if (pieChart) {
@@ -263,16 +271,13 @@
                 }
                 chartBox.style.display = 'none';
                 legendBox.style.display = 'none';
-                cashflowSection.style.display = 'none';
                 noDataMessage.style.display = 'block';
             } else {
                 chartBox.style.display = 'flex';
                 legendBox.style.display = 'flex';
-                cashflowSection.style.display = 'flex';
                 noDataMessage.style.display = 'none';
                 
                 const categoryData = calculateCategoryBreakdown(dateFilteredExpenses);
-                updateCashflow(dateFilteredExpenses);
                 createPieChart(categoryData);
                 updateLegend(categoryData);
             }
@@ -374,7 +379,8 @@
             toggleLabel.prepend(toggleInput);
             toggleDiv.appendChild(toggleLabel);
             legendContainer.appendChild(toggleDiv);
-            const dateFilteredExpenses = getExpenses(allExpenses, timeRangeSelected);
+            const dateFilteredExpenses = getExpenses(allExpenses, timeRangeSelected,
+                document.getElementById('includeFutureToggle').checked);
             const currentDateCategories = [...new Set(dateFilteredExpenses
                 .map(exp => exp.category))];
             const categoryMap = new Map(categoryData.map(cat => [cat.category, cat]));
@@ -652,6 +658,8 @@
         }
 
         let timeRangeSelected = 'month';
+        document.getElementById('includeFutureToggle').checked = false;
+        document.getElementById('includeFutureToggle').addEventListener('change', updateChartAndLegend);
         document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.checked) {

@@ -46,7 +46,12 @@
     - View monthly, yearly, or all expenses chronologically, edit them, and delete them (hold shift to skip confirm)
     - Filter by name, category, tags, amount, or date
     - Tags show up if at least one transaction uses it; 
-3. Settings page for configurations and additional features
+3. Future transaction visibility
+    - Chart and table views include transactions through today in your browser's local timezone by default
+    - Enable the "Future transactions" switch below date navigation to include planned income and expenses in the selected monthly, yearly, or all-transactions view and its totals
+    - Each page opens with future transactions hidden; the checkbox preference is not saved
+    - Future recurring and manually added transactions remain stored and can be edited or deleted when shown; exports are unchanged
+4. Settings page for configurations and additional features
     - Reorder, add, or remove custom categories
     - Select a custom currency symbol and a custom start date
     - Exporting data as CSV and import CSV from virtually anywhere

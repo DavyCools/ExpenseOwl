@@ -136,7 +136,7 @@ function getMonthBounds(date) {
     }
 }
 
-function getExpenses(expenses, timeRange = 'month') {
+function getExpenses(expenses, timeRange = 'month', includeFuture = false) {
     let start, end;
     if (timeRange === 'month') {
          ({ start, end } = getMonthBounds(currentDate));
@@ -146,13 +146,12 @@ function getExpenses(expenses, timeRange = 'month') {
         start = new Date(yearStart.toISOString());
         end = new Date(yearEnd.toISOString());
     }
-    else {
-        return expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
-
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
     return expenses.filter(exp => {
         const expDate = new Date(exp.date);
-        return expDate >= start && expDate <= end;
+        if (!includeFuture && expDate > endOfToday) return false;
+        return timeRange === 'all' || (expDate >= start && expDate <= end);
     }).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 

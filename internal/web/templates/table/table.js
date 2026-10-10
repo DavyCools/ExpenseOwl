@@ -69,7 +69,7 @@ function createTable(expenses, categoryOptions, tagOptions) {
                 ${filterRow}
             </thead>
             <tbody id="expense-table-body">
-                ${expenses.map((expense, index) => `
+                ${expenses.map(expense => `
                     <tr>
                         <td>${escapeHTML(expense.name)}</td>
                         <td>${escapeHTML(expense.category)}</td>
@@ -77,7 +77,7 @@ function createTable(expenses, categoryOptions, tagOptions) {
                         <td class="amount">${formatCurrency(expense.amount)}</td>
                         <td class="date-column">${formatDateFromUTC(expense.date)}</td>
                         <td>
-                            <button class="edit-button" onclick="editExpenseByIndex(${index})">
+                            <button class="edit-button" onclick="editExpenseById('${expense.id}')">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <button class="delete-button" onclick="handleDeleteClick(event, '${expense.id}')">
@@ -228,7 +228,7 @@ function updateTableBody() {
     const hasTags = expensesForTable.some(exp => exp.tags && exp.tags.length > 0);
     const tbody = document.getElementById('expense-table-body');
     if (!tbody) return;
-    tbody.innerHTML = filtered.map((expense, index) => `
+    tbody.innerHTML = filtered.map(expense => `
         <tr>
             <td>${escapeHTML(expense.name)}</td>
             <td>${escapeHTML(expense.category)}</td>
@@ -236,7 +236,7 @@ function updateTableBody() {
             <td class="amount">${formatCurrency(expense.amount)}</td>
             <td class="date-column">${formatDateFromUTC(expense.date)}</td>
             <td>
-                <button class="edit-button" onclick="editExpenseByIndex(${index})">
+                <button class="edit-button" onclick="editExpenseById('${expense.id}')">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
                 <button class="delete-button" onclick="handleDeleteClick(event, '${expense.id}')">
@@ -250,11 +250,13 @@ function updateTableBody() {
     }
 }
 
-function editExpenseByIndex(index) {
-    const expense = expensesForTable[index];
-    if (expense) {
-        editExpense(expense.id, expense.name, expense.category, expense.amount, (expense.tags || []), expense.date);
+function editExpenseById(id) {
+    const expense = allExpenses.find(exp => exp.id === id);
+    if (!expense) {
+        alert('Failed to load expense for editing. Please refresh and try again.');
+        return;
     }
+    editExpense(expense.id, expense.name, expense.category, expense.amount, (expense.tags || []), expense.date);
 }
 
 function renderSelectedTags(tags) {
@@ -561,4 +563,4 @@ document.getElementById('name').addEventListener('click', (e) => {
     }
 });
 
-window.editExpenseByIndex = editExpenseByIndex;
+window.editExpenseById = editExpenseById;

@@ -43,8 +43,8 @@
     - Visualize the month's breakdown without considering some categories like Rent
     - Cashflow shows total income, total expenses, and balance (red or green based on +ve or -ve)
 2. Table view for detailed expense listing
-    - View monthly or all expenses chronologically and delete them (hold shift to skip confirm)
-    - Use the browser to search for a name or tags if needed
+    - View monthly, yearly, or all expenses chronologically, edit them, and delete them (hold shift to skip confirm)
+    - Filter by name, category, tags, amount, or date
     - Tags show up if at least one transaction uses it; 
 3. Settings page for configurations and additional features
     - Reorder, add, or remove custom categories

@@ -981,6 +981,30 @@ header {
     margin-bottom: 1rem;
 }
 
+.transaction-visibility[hidden] {
+    display: none;
+}
+
+.future-transactions-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.future-transactions-settings label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.future-transactions-settings p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
 .transaction-visibility label {
     position: relative;
     display: inline-flex;

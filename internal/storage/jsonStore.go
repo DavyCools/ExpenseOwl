@@ -100,6 +100,7 @@ func (s *jsonStore) readConfigFile(path string) (*Config, error) {
 		return nil, err
 	}
 	var data Config
+	data.ShowFutureTransactions = true
 	if err := json.Unmarshal(content, &data); err != nil {
 		return nil, err
 	}
@@ -194,6 +195,18 @@ func (s *jsonStore) UpdateStartDate(startDate int) error {
 	}
 	data.StartDate = startDate
 	s.defaults["start_date"] = fmt.Sprintf("%d", startDate)
+	return s.writeConfigFile(s.configPath, data)
+}
+
+func (s *jsonStore) UpdateFutureTransactionsSettings(showSwitch, includeByDefault bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	data, err := s.readConfigFile(s.configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %v", err)
+	}
+	data.ShowFutureTransactions = showSwitch
+	data.IncludeFutureTransactions = includeByDefault
 	return s.writeConfigFile(s.configPath, data)
 }
 

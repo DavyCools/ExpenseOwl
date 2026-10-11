@@ -22,6 +22,7 @@ type Storage interface {
 	UpdateCurrency(currency string) error
 	GetStartDate() (int, error)
 	UpdateStartDate(startDate int) error
+	UpdateFutureTransactionsSettings(showSwitch, includeByDefault bool) error
 
 	// Recurring Expenses
 	GetRecurringExpenses() ([]RecurringExpense, error)
@@ -46,10 +47,12 @@ type Storage interface {
 
 // config for expense data
 type Config struct {
-	Categories        []string           `json:"categories"`
-	Currency          string             `json:"currency"`
-	StartDate         int                `json:"startDate"`
-	RecurringExpenses []RecurringExpense `json:"recurringExpenses"`
+	Categories                []string           `json:"categories"`
+	Currency                  string             `json:"currency"`
+	StartDate                 int                `json:"startDate"`
+	ShowFutureTransactions    bool               `json:"showFutureTransactions"`
+	IncludeFutureTransactions bool               `json:"includeFutureTransactions"`
+	RecurringExpenses         []RecurringExpense `json:"recurringExpenses"`
 	// Tags              []string           `json:"tags"`
 }
 
@@ -97,6 +100,8 @@ func (c *Config) SetBaseConfig() {
 	c.Categories = defaultCategories
 	c.Currency = "usd"
 	c.StartDate = 1
+	c.ShowFutureTransactions = true
+	c.IncludeFutureTransactions = false
 	// c.Tags = []string{}
 	c.RecurringExpenses = []RecurringExpense{}
 }

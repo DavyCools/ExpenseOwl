@@ -50,8 +50,14 @@ const (
 		id VARCHAR(255) PRIMARY KEY DEFAULT 'default',
 		categories TEXT NOT NULL,
 		currency VARCHAR(255) NOT NULL,
-		start_date INTEGER NOT NULL
+		start_date INTEGER NOT NULL,
+		show_future_transactions BOOLEAN NOT NULL DEFAULT TRUE,
+		include_future_transactions BOOLEAN NOT NULL DEFAULT FALSE
 	);`
+	migrateFutureTransactionsSettingsSQL = `
+	ALTER TABLE config
+		ADD COLUMN IF NOT EXISTS show_future_transactions BOOLEAN NOT NULL DEFAULT TRUE,
+		ADD COLUMN IF NOT EXISTS include_future_transactions BOOLEAN NOT NULL DEFAULT FALSE;`
 )
 
 func InitializePostgresStore(baseConfig SystemConfig) (Storage, error) {
@@ -76,7 +82,7 @@ func makeDBURL(baseConfig SystemConfig) string {
 }
 
 func createTables(db *sql.DB) error {
-	for _, query := range []string{createExpensesTableSQL, createRecurringExpensesTableSQL, createConfigTableSQL} {
+	for _, query := range []string{createExpensesTableSQL, createRecurringExpensesTableSQL, createConfigTableSQL, migrateFutureTransactionsSettingsSQL} {
 		if _, err := db.Exec(query); err != nil {
 			return err
 		}
@@ -94,14 +100,17 @@ func (s *databaseStore) saveConfig(config *Config) error {
 		return fmt.Errorf("failed to marshal categories: %v", err)
 	}
 	query := `
-		INSERT INTO config (id, categories, currency, start_date)
-		VALUES ('default', $1, $2, $3)
+		INSERT INTO config (id, categories, currency, start_date, show_future_transactions, include_future_transactions)
+		VALUES ('default', $1, $2, $3, $4, $5)
 		ON CONFLICT (id) DO UPDATE SET
 			categories = EXCLUDED.categories,
 			currency = EXCLUDED.currency,
-			start_date = EXCLUDED.start_date;
+			start_date = EXCLUDED.start_date,
+			show_future_transactions = EXCLUDED.show_future_transactions,
+			include_future_transactions = EXCLUDED.include_future_transactions;
 	`
-	_, err = s.db.Exec(query, string(categoriesJSON), config.Currency, config.StartDate)
+	_, err = s.db.Exec(query, string(categoriesJSON), config.Currency, config.StartDate,
+		config.ShowFutureTransactions, config.IncludeFutureTransactions)
 	s.defaults["currency"] = config.Currency
 	s.defaults["start_date"] = fmt.Sprintf("%d", config.StartDate)
 	return err
@@ -119,10 +128,11 @@ func (s *databaseStore) updateConfig(updater func(c *Config) error) error {
 }
 
 func (s *databaseStore) GetConfig() (*Config, error) {
-	query := `SELECT categories, currency, start_date FROM config WHERE id = 'default'`
+	query := `SELECT categories, currency, start_date, show_future_transactions, include_future_transactions FROM config WHERE id = 'default'`
 	var categoriesStr, currency string
 	var startDate int
-	err := s.db.QueryRow(query).Scan(&categoriesStr, &currency, &startDate)
+	var showSwitch, includeByDefault bool
+	err := s.db.QueryRow(query).Scan(&categoriesStr, &currency, &startDate, &showSwitch, &includeByDefault)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -139,6 +149,8 @@ func (s *databaseStore) GetConfig() (*Config, error) {
 	var config Config
 	config.Currency = currency
 	config.StartDate = startDate
+	config.ShowFutureTransactions = showSwitch
+	config.IncludeFutureTransactions = includeByDefault
 	if err := json.Unmarshal([]byte(categoriesStr), &config.Categories); err != nil {
 		return nil, fmt.Errorf("failed to parse categories from db: %v", err)
 	}
@@ -199,6 +211,14 @@ func (s *databaseStore) UpdateStartDate(startDate int) error {
 	}
 	return s.updateConfig(func(c *Config) error {
 		c.StartDate = startDate
+		return nil
+	})
+}
+
+func (s *databaseStore) UpdateFutureTransactionsSettings(showSwitch, includeByDefault bool) error {
+	return s.updateConfig(func(c *Config) error {
+		c.ShowFutureTransactions = showSwitch
+		c.IncludeFutureTransactions = includeByDefault
 		return nil
 	})
 }

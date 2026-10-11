@@ -69,7 +69,7 @@
             <button id="nextYear" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
         </div>
 
-        <div class="transaction-visibility">
+        <div class="transaction-visibility" hidden>
             <label class="future-switch">
                 <input type="checkbox" id="includeFutureToggle" role="switch" autocomplete="off">
                 <span class="future-switch-track" aria-hidden="true"></span>
@@ -260,7 +260,7 @@
             const cashflowSection = document.getElementById('cashflow-section');
             const noDataMessage = document.getElementById('noDataMessage');
             noDataMessage.textContent = 'No expenses recorded this time period.' +
-                (includeFuture ? '' : ' Future transactions are hidden. Enable "Future transactions" to show them.');
+                futureTransactionsMessage();
             updateCashflow(dateFilteredExpenses);
             cashflowSection.style.display = dateFilteredExpenses.length > 0 ? 'flex' : 'none';
             const hasExpensesOrGains = dateFilteredExpenses.some(e => e.amount !== 0);
@@ -538,6 +538,7 @@
                 ).join('');
                 currentCurrency = config.currency;
                 startDate = config.startDate;
+                applyFutureTransactionsSettings(config);
                 
                 const response = await fetch('/expenses');
                 if (!response.ok) throw new Error('Failed to fetch data');
@@ -658,7 +659,6 @@
         }
 
         let timeRangeSelected = 'month';
-        document.getElementById('includeFutureToggle').checked = false;
         document.getElementById('includeFutureToggle').addEventListener('change', updateChartAndLegend);
         document.querySelectorAll('input[name="timeRange"]').forEach(radio => {
             radio.addEventListener('change', function() {

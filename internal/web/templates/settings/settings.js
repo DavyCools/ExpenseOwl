@@ -372,6 +372,31 @@ async function saveStartDate() {
     }
 }
 
+async function saveFutureTransactionsSettings() {
+    const button = document.getElementById('saveFutureTransactionsSettings');
+    button.disabled = true;
+    try {
+        const response = await fetch('/future-transactions/edit', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                showFutureTransactions: document.getElementById('showFutureTransactions').checked,
+                includeFutureTransactions: document.getElementById('includeFutureTransactions').checked
+            })
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to save future transaction settings');
+        }
+        showMessage('futureTransactionsMessage', 'Future transaction settings saved successfully', true);
+    } catch (error) {
+        console.error('Error saving future transaction settings:', error);
+        showMessage('futureTransactionsMessage', error.message, false);
+    } finally {
+        button.disabled = false;
+    }
+}
+
 async function fetchAndRenderRecurringExpenses() {
     try {
         const response = await fetch('/recurring-expenses');
@@ -583,6 +608,11 @@ async function initialize() {
         categories = [...config.categories];
         currentCurrency = config.currency;
         currentStartDate = config.startDate;
+        document.getElementById('showFutureTransactions').checked = config.showFutureTransactions;
+        document.getElementById('includeFutureTransactions').checked = config.includeFutureTransactions;
+        document.getElementById('showFutureTransactions').disabled = false;
+        document.getElementById('includeFutureTransactions').disabled = false;
+        document.getElementById('saveFutureTransactionsSettings').disabled = false;
         allTags.clear();
         (expenses || []).forEach(exp => (exp.tags || []).forEach(tag => allTags.add(tag)));
         (recurringExpenses || []).forEach(exp => (exp.tags || []).forEach(tag => allTags.add(tag)));
@@ -634,6 +664,7 @@ document.getElementById('addCategory').addEventListener('click', addCategory);
 document.getElementById('saveCategories').addEventListener('click', saveCategories);
 document.getElementById('saveCurrency').addEventListener('click', saveCurrency);
 document.getElementById('saveStartDate').addEventListener('click', saveStartDate);
+document.getElementById('saveFutureTransactionsSettings').addEventListener('click', saveFutureTransactionsSettings);
 document.getElementById('csv-import-file').addEventListener('change', handleCsvImport);
 document.getElementById('newCategory').addEventListener('keypress', e => e.key === 'Enter' && addCategory());
 

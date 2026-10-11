@@ -26,9 +26,8 @@ function createTable(expenses, categoryOptions, tagOptions) {
     if (!expenses || expenses.length === 0) {
         const message = document.getElementById('showAllToggle').checked ? 
                         'No transactions found' : 
-                        'No expenses recorded for this ' + timeRangeSelected;
-        const futureMessage = document.getElementById('includeFutureToggle').checked ? '' :
-            ' Future transactions are hidden. Enable "Future transactions" to show them.';
+                        'No expenses recorded for this ' + timeRangeSelected + '.';
+        const futureMessage = futureTransactionsMessage();
         return `<div class="no-data">${message}${futureMessage}</div>`;
     }
     // Use the global expensesForTable to determine if tags column should be shown
@@ -390,6 +389,7 @@ async function initialize() {
         ).join('');
         currentCurrency = config.currency;
         startDate = config.startDate;
+        applyFutureTransactionsSettings(config);
         
         const response = await fetch('/expenses');
         if (!response.ok) throw new Error('Failed to fetch data');
@@ -414,7 +414,6 @@ async function initialize() {
     }
 }
 
-document.getElementById('includeFutureToggle').checked = false;
 document.getElementById('includeFutureToggle').addEventListener('change', updateTable);
 
 document.querySelectorAll('input[name="timeRange"]').forEach(radio => {

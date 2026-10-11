@@ -47,9 +47,10 @@
     - Filter by name, category, tags, amount, or date
     - Tags show up if at least one transaction uses it; 
 3. Future transaction visibility
-    - Chart and table views include transactions through today in your browser's local timezone by default
+    - Chart and table views initially include transactions through today in your browser's local timezone
     - Enable the "Future transactions" switch below date navigation to include planned income and expenses in the selected monthly, yearly, or all-transactions view and its totals
-    - Each page opens with future transactions hidden; the checkbox preference is not saved
+    - Settings lets you hide/show the switch and choose whether future transactions are included by default, independently
+    - These settings are saved for the app across devices; changing the switch in a view only affects that page until it is reloaded
     - Future recurring and manually added transactions remain stored and can be edited or deleted when shown; exports are unchanged
 4. Settings page for configurations and additional features
     - Reorder, add, or remove custom categories
@@ -138,6 +139,10 @@ With the exception of [Data backends](#data-backends), all configuration of Expe
   - Recurring transactions will be listed at the bottom of the page and can be edited/removed (all or future only transactions)
   - Recurring transactions allow similar options as normal expenses - category, tags, amount, name
 - Theme Settings: supports light and dark theme, with default behavior to adapt to system
+- Future Transactions:
+  - Saved config keys: `showFutureTransactions` and `includeFutureTransactions`
+  - Show or hide the future transactions switch on the chart and table (shown by default)
+  - Include or exclude future transactions by default (excluded by default), even when the switch is hidden
 - Import/Export Data: covered under [Data Import/Export](#data-importexport)
 
 ### Data Backends

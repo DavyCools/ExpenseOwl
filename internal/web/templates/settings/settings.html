@@ -105,6 +105,23 @@
         </div>
         
         <div class="form-container">
+            <h2 align="center">Future Transactions</h2>
+            <div class="future-transactions-settings">
+                <label>
+                    <input type="checkbox" id="showFutureTransactions" disabled>
+                    Show the future transactions switch on the chart and table
+                </label>
+                <label>
+                    <input type="checkbox" id="includeFutureTransactions" disabled>
+                    Include future transactions by default
+                </label>
+                <p>The default applies when opening the chart or table, even when the switch is hidden.</p>
+                <button id="saveFutureTransactionsSettings" class="nav-button" disabled>Save</button>
+            </div>
+            <div id="futureTransactionsMessage" class="form-message"></div>
+        </div>
+
+        <div class="form-container">
             <h2 align="center">Recurring Transactions</h2>
             <form id="recurringExpenseForm" class="expense-form recurring-expense-form">
                 <div class="form-group">

@@ -217,6 +217,31 @@ func (h *Handler) UpdateCurrency(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "success"})
 }
 
+func (h *Handler) UpdateFutureTransactionsSettings(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		writeJSON(w, http.StatusMethodNotAllowed, ErrorResponse{Error: "Method not allowed"})
+		return
+	}
+	var settings struct {
+		ShowSwitch       *bool `json:"showFutureTransactions"`
+		IncludeByDefault *bool `json:"includeFutureTransactions"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&settings); err != nil {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Invalid request body"})
+		return
+	}
+	if settings.ShowSwitch == nil || settings.IncludeByDefault == nil {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Both future transaction settings are required"})
+		return
+	}
+	if err := h.storage.UpdateFutureTransactionsSettings(*settings.ShowSwitch, *settings.IncludeByDefault); err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to save future transaction settings"})
+		log.Printf("API ERROR: Failed to save future transaction settings: %v\n", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "success"})
+}
+
 func (h *Handler) GetStartDate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusMethodNotAllowed, ErrorResponse{Error: "Method not allowed"})

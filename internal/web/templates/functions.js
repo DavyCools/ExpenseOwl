@@ -136,6 +136,25 @@ function getMonthBounds(date) {
     }
 }
 
+function applyFutureTransactionsSettings(config) {
+    const toggle = document.getElementById('includeFutureToggle');
+    const container = toggle.closest('.transaction-visibility');
+    const showSwitch = config.showFutureTransactions;
+    if (!toggle.dataset.initialized || !showSwitch) {
+        toggle.checked = config.includeFutureTransactions;
+        toggle.dataset.initialized = 'true';
+    }
+    container.hidden = !showSwitch;
+}
+
+function futureTransactionsMessage() {
+    const toggle = document.getElementById('includeFutureToggle');
+    if (toggle.checked) return '';
+    return toggle.closest('.transaction-visibility').hidden ?
+        ' Future transactions are hidden. Change the default in Settings to include them.' :
+        ' Future transactions are hidden. Enable "Future transactions" to show them.';
+}
+
 function getExpenses(expenses, timeRange = 'month', includeFuture = false) {
     let start, end;
     if (timeRange === 'month') {

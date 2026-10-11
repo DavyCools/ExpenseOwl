@@ -1,0 +1,39 @@
+{{define "transaction-controls"}}
+        <div class="time-range-wrapper">
+            <div class="table-controls">
+                <label>
+                    <input type="radio" id="showMonthToggle" class="pointer" name="timeRange" value="month" checked>
+                    <label for="showMonthToggle" class="pointer">Monthly Transactions</label><br>
+                </label>
+                <label>
+                    <input type="radio" id="showYearToggle" class="pointer" name="timeRange" value="year">
+                    <label for="showYearToggle" class="pointer">Yearly Transactions</label><br>
+                </label>
+                <label>
+                    <input type="radio" id="showAllToggle" class="pointer" name="timeRange" value="all">
+                    <label for="showAllToggle" class="pointer">All Transactions</label> 
+                </label>
+            </div>
+        </div>
+
+        <div class="expense-navigation" id="month-navigation">
+            <button id="prevMonth" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="current-date" id="currentMonth"></div>
+            <button id="nextMonth" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <div class="expense-navigation" id="year-navigation">
+            <button id="prevYear" class="nav-button"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="current-date" id="currentYear"></div>
+            <button id="nextYear" class="nav-button"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <div class="transaction-visibility" hidden>
+            <label class="future-switch">
+                <input type="checkbox" id="includeFutureToggle" role="switch" autocomplete="off">
+                <span class="future-switch-track" aria-hidden="true"></span>
+                <span>Future transactions</span>
+            </label>
+        </div>
+
+{{end}}

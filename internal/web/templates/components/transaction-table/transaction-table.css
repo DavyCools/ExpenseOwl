@@ -1,0 +1,65 @@
+/* Table filter input styling to match Add Expense form */
+.form-filter-input {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 90%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-filter-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.expense-table {
+    width: 100%;
+    border-collapse: separate;
+    border-radius: 8px;
+    border-spacing: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: none;
+}
+
+.expense-table th,
+.expense-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--bg-secondary);
+}
+
+.expense-table th {
+    background-color: var(--bg-primary);
+    font-weight: 600;
+}
+
+.expense-table tr:last-child td {
+    border-bottom: none;
+}
+
+.date-column {
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+.date-column,
+    .date-header,
+    .tags-column {
+        display: none;
+    }
+
+.expense-table th,
+    .expense-table td {
+        padding: 0.75rem;
+    }
+
+}
+
+
+.filtered-empty { text-align: center; }

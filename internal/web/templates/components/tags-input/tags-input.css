@@ -1,0 +1,70 @@
+.tags-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    /* gap: 0.5rem; */
+    /* padding: 0.5rem; */
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    cursor: text;
+}
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tags-input-container input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    color: var(--text-primary);
+    min-width: 100px;
+}
+
+.tag-pill {
+    background-color: var(--accent);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.remove-tag {
+    cursor: pointer;
+    margin-left: 0.25rem;
+}
+
+.tags-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+}
+
+.tags-dropdown div {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.tags-dropdown div:hover {
+    background-color: var(--accent);
+}
+
+.tags-dropdown .new-tag {
+    color: #2EAB7D;
+    font-style: italic;
+}
+

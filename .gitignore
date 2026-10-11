@@ -2,3 +2,5 @@ data
 main
 .DS_Store
 .vscode
+/tmp/
+tests/frontend/node_modules/

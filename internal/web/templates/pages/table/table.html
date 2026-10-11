@@ -1,0 +1,31 @@
+{{define "page-table"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/fa.min.css">
+    <link rel="stylesheet" href="/shared/styles.css">
+    <link rel="stylesheet" href="/components/navigation/navigation.css">
+    <link rel="stylesheet" href="/components/transaction-controls/transaction-controls.css">
+    <link rel="stylesheet" href="/components/tags-input/tags-input.css">
+    <link rel="stylesheet" href="/components/expense-form/expense-form.css">
+    <link rel="stylesheet" href="/components/transaction-table/transaction-table.css">
+    <link rel="stylesheet" href="/components/modal/modal.css">
+    <link rel="stylesheet" href="/shared/overrides.css">
+    <script src="/theme.js" defer></script>
+    <title>ExpenseOwl Table</title>
+</head>
+<body>
+    <div class="container">
+        {{template "navigation" "table"}}
+        {{template "transaction-controls" .}}
+        {{template "expense-form" .}}
+        {{template "transaction-table" .}}
+    </div>
+    {{template "shared-templates" .}}
+    {{template "tags-templates" .}}
+    <script type="module" src="/pages/table/table.js"></script>
+</body>
+</html>
+{{end}}

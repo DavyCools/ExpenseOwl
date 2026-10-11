@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"slices"
@@ -481,7 +483,7 @@ func (h *Handler) ServeTableView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html")
-	if err := web.ServeTemplate(w, "table/table.html"); err != nil {
+	if err := web.ServeTemplate(w, "page-table"); err != nil {
 		http.Error(w, "Failed to serve template", http.StatusInternalServerError)
 	}
 }
@@ -492,7 +494,7 @@ func (h *Handler) ServeSettingsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html")
-	if err := web.ServeTemplate(w, "settings/settings.html"); err != nil {
+	if err := web.ServeTemplate(w, "page-settings"); err != nil {
 		http.Error(w, "Failed to serve template", http.StatusInternalServerError)
 	}
 }
@@ -503,6 +505,11 @@ func (h *Handler) ServeStaticFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := web.ServeStatic(w, r.URL.Path); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			http.NotFound(w, r)
+			return
+		}
+		log.Printf("HTTP ERROR: Failed to serve static file: %v", err)
 		http.Error(w, "Failed to serve static file", http.StatusInternalServerError)
 	}
 }

@@ -1,0 +1,22 @@
+{{define "settings-import-export"}}
+<section class="form-container half-width">
+    <h2 align="center">Import/Export Data</h2>
+    <div class="export-buttons">
+        <div class="export-options">
+            <a href="/export/csv" id="csv-export-file" class="nav-button" download="expenses.csv">Export to CSV</a>
+        </div>
+        <div class="import-option">
+            <label for="csv-import-file" class="nav-button">Import from CSV</label>
+            <input type="file" id="csv-import-file" accept=".csv">
+        </div>
+    </div>
+    <div id="importMessage" class="form-message"></div>
+    <div id="importSummary" class="import-summary" hidden>
+        <h3>Import Summary</h3>
+        <p>Total Processed: <span id="summary-processed"></span></p>
+        <p>Imported: <span id="summary-imported"></span></p>
+        <p>Skipped: <span id="summary-skipped"></span></p>
+        <p>New Categories: <span id="summary-new-categories"></span></p>
+    </div>
+</section>
+{{end}}

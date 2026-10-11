@@ -1,0 +1,214 @@
+:root {
+    /* Default theme: Dark mode */
+    --bg-primary: #081528;
+    --bg-secondary: #101f3b;
+    --text-primary: #f4f4f4;
+    --text-secondary: #b3b3b3;
+    --border: #1a365d;
+    --accent: #2d678e;
+}
+
+/* Light theme override */
+html[data-theme='light'] {
+    --bg-primary: #f2e5d7;
+    --bg-secondary: #faecdd;
+    --text-primary: #2e2e2e;
+    --text-secondary: #3e3e3e;
+    --border: #e6ddd4;
+}
+
+/* Dark theme override */
+html[data-theme='dark'] {
+    --bg-primary: #081528;
+    --bg-secondary: #101f3b;
+    --text-primary: #f4f4f4;
+    --text-secondary: #b3b3b3;
+    --border: #1a365d;
+}
+
+/* System preference for light mode (when no theme is set) */
+@media (prefers-color-scheme: light) {
+:root:not([data-theme]) {
+        --bg-primary: #f2e5d7;
+        --bg-secondary: #faecdd;
+        --text-primary: #2e2e2e;
+        --text-secondary: #3e3e3e;
+        --border: #e6ddd4;
+    }
+
+}
+
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+header {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-button, .edit-button {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+@media (prefers-color-scheme: light) {
+#prevMonth, #nextMonth, #toggleExpenseFormBtn {
+        background-color: var(--bg-secondary);
+    }
+
+}
+
+
+.nav-button, .view-button, .edit-button {
+    border-radius: 9999px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border);
+}
+
+.nav-button:hover, .edit-button:hover {
+    background-color: var(--accent);
+}
+
+.nav-button:hover, .view-button:hover, .edit-button:hover {
+    background-color: var(--accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.amount {
+    font-family: monospace;
+    color: var(--text-secondary);
+}
+
+.no-data {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 2rem;
+}
+
+@keyframes tooltip-appear {
+    to {
+        opacity: 1;
+    }
+}
+
+.delete-button, .edit-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.delete-button, .edit-button {
+    border-radius: 9999px;
+    padding: 6px 10px;
+}
+
+.delete-button:hover {
+    background-color: rgba(255, 99, 99, 0.1);
+    color: #ff6b6b;
+}
+
+.edit-button:hover {
+    background-color: rgba(105, 175, 222, 0.1);
+    color: var(--accent);
+}
+
+.form-container.half-width {
+    flex: 1;
+}
+
+.form-help-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+.nav-button {
+        padding: 0.25rem 0.75rem;
+        font-size: 1rem;
+    }
+
+.container {
+        padding: 0.5rem;
+    }
+
+.export-buttons .nav-button {
+        text-align: center;
+    }
+
+}
+
+
+.form-container {
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-message {
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.form-message:not(:empty) {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    height: auto;
+    min-height: 2rem;
+    opacity: 1;
+    border-radius: 4px;
+    text-align: center;
+    grid-column: 1 / -1;
+}
+
+.form-message.success {
+    background-color: rgba(52, 211, 153, 0.1);
+    color: #2EAB7D;
+}
+
+.form-message.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.pointer {
+    cursor: pointer;
+}
+

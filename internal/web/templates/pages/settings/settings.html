@@ -1,0 +1,45 @@
+{{define "page-settings"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/fa.min.css">
+    <link rel="stylesheet" href="/shared/styles.css">
+    <link rel="stylesheet" href="/components/navigation/navigation.css">
+    <link rel="stylesheet" href="/components/settings/settings.css">
+    <link rel="stylesheet" href="/components/tags-input/tags-input.css">
+    <link rel="stylesheet" href="/components/expense-form/expense-form.css">
+    <link rel="stylesheet" href="/components/modal/modal.css">
+    <link rel="stylesheet" href="/shared/overrides.css">
+    <script src="/theme.js" defer></script>
+    <title>ExpenseOwl Settings</title>
+</head>
+<body>
+    <div class="container">
+        {{template "navigation" "settings"}}
+
+        <div class="info-field">
+            Version: <a id="version-link" href="https://github.com/DavyCools/expenseowl/releases/latest" target="_blank" rel="noopener noreferrer">v4.7</a>
+            <span class="separator">|</span>
+            <a href="https://github.com/DavyCools/expenseowl/blob/main/README.md" target="_blank" rel="noopener noreferrer">Documentation</a>
+            <span class="separator">|</span>
+            <a href="https://github.com/DavyCools/expenseowl" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+
+        {{template "settings-categories" .}}
+        {{template "settings-preferences" .}}
+        <div class="settings-container">
+            {{template "settings-theme" .}}
+            {{template "settings-import-export" .}}
+        </div>
+        {{template "settings-future" .}}
+        {{template "settings-recurring-transactions" .}}
+    </div>
+
+    {{template "shared-templates" .}}
+    {{template "tags-templates" .}}
+    <script type="module" src="/pages/settings/settings.js"></script>
+</body>
+</html>
+{{end}}

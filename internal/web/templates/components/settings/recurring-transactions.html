@@ -1,0 +1,146 @@
+{{define "settings-recurring-transactions"}}
+<section class="form-container">
+    <h2 align="center">Recurring Transactions</h2>
+    <form id="recurringExpenseForm" class="expense-form recurring-expense-form">
+        <div class="form-group">
+            <label for="recurringName">Name</label>
+            <input type="text" id="recurringName" required>
+        </div>
+        <div class="form-group">
+            <label for="recurringAmount">Amount</label>
+            <input type="number" id="recurringAmount" step="0.01" min="0.01" max="9000000000000000" required>
+        </div>
+        <div class="form-group">
+            <label for="recurringCategory">Category</label>
+            <select id="recurringCategory" required></select>
+        </div>
+        <div class="form-group">
+            <label for="tags-input">Tags</label>
+            <div class="tags-input-container">
+                <div id="selected-tags" class="selected-tags"></div>
+                <input type="text" id="tags-input" placeholder="(optional)">
+            </div>
+            <div id="tags-dropdown" class="tags-dropdown"></div>
+        </div>
+        <div class="form-group">
+            <label for="recurringInterval">Interval</label>
+            <select id="recurringInterval" required>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="recurringStartDate">Start Date</label>
+            <input type="date" id="recurringStartDate" required>
+        </div>
+        <div class="form-group">
+            <label for="recurringOccurrences">Occurrences</label>
+            <input type="number" id="recurringOccurrences" min="2" value="2" required>
+        </div>
+        <div class="form-group form-group-checkbox">
+            <label for="recurringReportGain">Report Gain</label>
+            <input type="checkbox" id="recurringReportGain" class="styled-checkbox">
+        </div>
+        <button type="submit" class="nav-button">Add Recurring Transaction</button>
+    </form>
+    <div id="recurringExpenseMessage" class="form-message"></div>
+    <h3 align="center" class="recurring-expense-heading">Existing Recurring Transactions</h3>
+    <div id="recurring-expenses-list"></div>
+</section>
+
+<div id="deleteRecurringModal" class="modal">
+    <div class="modal-content">
+        <h3>Delete Recurring Expense</h3>
+        <p>Do you want to delete all instances of this expense, or only future ones?</p>
+        <div class="modal-buttons">
+            <button class="modal-button" type="button" data-action="close-delete">Cancel</button>
+            <button class="modal-button" type="button" data-action="delete-recurring" data-remove-all="false">Delete Future</button>
+            <button class="modal-button confirm" type="button" data-action="delete-recurring" data-remove-all="true">Delete All</button>
+        </div>
+    </div>
+</div>
+
+<div id="editRecurringModal" class="modal">
+    <div class="modal-content">
+        <h3>Edit Recurring Expense</h3>
+        <form id="editRecurringExpenseForm" class="expense-form recurring-expense-form">
+            <div class="form-group">
+                <label for="editRecurringName">Name</label>
+                <input type="text" id="editRecurringName" required>
+            </div>
+            <div class="form-group">
+                <label for="editRecurringAmount">Amount</label>
+                <input type="number" id="editRecurringAmount" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="editRecurringCategory">Category</label>
+                <select id="editRecurringCategory" required></select>
+            </div>
+            <div class="form-group">
+                <label for="edit-tags-input">Tags</label>
+                <div class="tags-input-container">
+                    <div id="edit-selected-tags" class="selected-tags"></div>
+                    <input type="text" id="edit-tags-input" placeholder="(optional)">
+                </div>
+                <div id="edit-tags-dropdown" class="tags-dropdown"></div>
+            </div>
+            <div class="form-group">
+                <label for="editRecurringInterval">Interval</label>
+                <select id="editRecurringInterval" required>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editRecurringStartDate">Start Date</label>
+                <input type="date" id="editRecurringStartDate" required>
+            </div>
+            <div class="form-group">
+                <label for="editRecurringOccurrences">Occurrences (0 for indefinite)</label>
+                <input type="number" id="editRecurringOccurrences" min="0" value="0" required>
+            </div>
+            <div class="form-group form-group-checkbox">
+                <label for="editRecurringReportGain">Report Gain</label>
+                <input type="checkbox" id="editRecurringReportGain" class="styled-checkbox">
+            </div>
+        </form>
+        <div class="modal-buttons">
+            <button class="modal-button" type="button" data-action="close-edit">Cancel</button>
+            <button class="modal-button" type="button" data-action="update-recurring" data-update-all="false">Update Future</button>
+            <button class="modal-button confirm" type="button" data-action="update-recurring" data-update-all="true">Update All</button>
+        </div>
+    </div>
+</div>
+
+<template id="recurring-empty-template">
+    <p>No recurring expenses found.</p>
+</template>
+<template id="recurring-error-template">
+    <p>Error loading recurring expenses.</p>
+</template>
+<template id="recurring-table-template">
+    <table class="expense-table">
+        <thead>
+            <tr><th>Name</th><th>Amount</th><th>Category</th><th>Interval</th><th>Next Occurrence</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</template>
+<template id="recurring-row-template">
+    <tr>
+        <td data-field="name"></td>
+        <td data-field="amount"></td>
+        <td data-field="category"></td>
+        <td data-field="interval"></td>
+        <td data-field="next-occurrence"></td>
+        <td>
+            <button class="edit-button" type="button" data-action="edit-recurring"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="delete-button" type="button" data-action="show-delete"><i class="fa-solid fa-trash-can"></i></button>
+        </td>
+    </tr>
+</template>
+{{end}}

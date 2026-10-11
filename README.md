@@ -111,6 +111,30 @@ This is a community-contributed Kubernetes spec. Treat it as a sample and review
 
 </details>
 
+# Development
+
+The frontend uses plain HTML, CSS, and JavaScript modules; no frontend build step is required.
+
+- [Page controllers](internal/web/templates/pages) compose the dashboard, table, and settings views.
+- [Components](internal/web/templates/components) keep related HTML templates, JavaScript behavior, and CSS together.
+- [Shared utilities](internal/web/templates/shared) contain date/currency helpers, DOM utilities, messages, and base styling.
+- Go composes the embedded HTML fragments before serving each page. Dynamic rows and lists clone HTML `<template>` elements and populate their values in JavaScript.
+- Third-party assets, the service worker, theme script, and icons retain their existing root paths.
+
+Run from the repository root with `go run ./cmd/expenseowl`. Since frontend assets are embedded in the binary, restart/rebuild after editing them.
+
+For automatic rebuilding, install [Air](https://github.com/air-verse/air) with `go install github.com/air-verse/air@latest`, then run `air -c .air.toml`. The configuration watches Go, HTML, JavaScript, CSS, and JSON files, excluding temporary builds, stored data, and tests. For automatic browser refresh, run `air -c .air.toml -proxy.enabled true -proxy.app_port 8080 -proxy.proxy_port 8090` and open `http://localhost:8090`.
+
+Tests live separately from application components:
+
+```powershell
+go test ./...
+npm --prefix tests\frontend ci
+npm --prefix tests\frontend test
+```
+
+Frontend DOM tests use Node.js 22 or newer and a dev-only dependency under [tests/frontend](tests/frontend); it is not embedded or needed to run the app.
+
 # Usage
 
 Once deployed, use the web interface to do everything. Access it through your browser:

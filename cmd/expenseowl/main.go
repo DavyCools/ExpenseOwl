@@ -38,7 +38,7 @@ func runServer(port int) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		if err := web.ServeTemplate(w, "index.html"); err != nil {
+		if err := web.ServeTemplate(w, "page-dashboard"); err != nil {
 			log.Printf("HTTP ERROR: Failed to serve template: %v", err)
 			http.Error(w, "Failed to serve template", http.StatusInternalServerError)
 			return
@@ -48,18 +48,17 @@ func runServer(port int) {
 	http.HandleFunc("/settings", handler.ServeSettingsPage)
 
 	// Static File Handlers
-	http.HandleFunc("/functions.js", handler.ServeStaticFile)
 	http.HandleFunc("/theme.js", handler.ServeStaticFile)
 	http.HandleFunc("/manifest.json", handler.ServeStaticFile)
 	http.HandleFunc("/sw.js", handler.ServeStaticFile)
 	http.HandleFunc("/icons/", handler.ServeStaticFile)
-	http.HandleFunc("/style.css", handler.ServeStaticFile)
 	http.HandleFunc("icons/favicon.ico", handler.ServeStaticFile)
 	http.HandleFunc("/chart.min.js", handler.ServeStaticFile)
 	http.HandleFunc("/fa.min.css", handler.ServeStaticFile)
 	http.HandleFunc("/webfonts/", handler.ServeStaticFile)
-	http.HandleFunc("/table/table.js", handler.ServeStaticFile)
-	http.HandleFunc("/settings/settings.js", handler.ServeStaticFile)
+	http.HandleFunc("/pages/", handler.ServeStaticFile)
+	http.HandleFunc("/components/", handler.ServeStaticFile)
+	http.HandleFunc("/shared/", handler.ServeStaticFile)
 
 	// Config
 	http.HandleFunc("/config", handler.GetConfig)

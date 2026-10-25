@@ -34,8 +34,10 @@
             {{template "settings-theme" .}}
             {{template "settings-import-export" .}}
         </div>
-        {{template "settings-language" .}}
-        {{template "settings-future" .}}
+        <div class="settings-container">
+            {{template "settings-language" .}}
+            {{template "settings-future" .}}
+        </div>
         {{template "settings-recurring-transactions" .}}
     </div>
 

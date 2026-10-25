@@ -1,3 +1,4 @@
+import { t, errorText } from '/shared/i18n.js';
 import { cloneTemplate } from '/shared/dom.js';
 import { showMessage } from '/shared/messages.js';
 
@@ -46,7 +47,7 @@ export function createSettingsCategories({ categories = [], onChange = () => {} 
         const oldName = categoryNames[index];
         const newName = input.value.trim().replace(/[<>]/g, ' ').trim();
         if (!newName) {
-            showMessage('categoriesMessage', 'Category name cannot be empty', false);
+            showMessage('categoriesMessage', t('settings.categoryEmpty'), false);
             return;
         }
         if (newName === oldName) {
@@ -54,7 +55,7 @@ export function createSettingsCategories({ categories = [], onChange = () => {} 
             return;
         }
         if (categoryNames.includes(newName)) {
-            showMessage('categoriesMessage', 'Category name already exists', false);
+            showMessage('categoriesMessage', t('settings.categoryDuplicate'), false);
             return;
         }
 
@@ -66,21 +67,21 @@ export function createSettingsCategories({ categories = [], onChange = () => {} 
             });
             if (!response.ok) {
                 const error = await response.json();
-                showMessage('categoriesMessage', `Failed to rename category: ${error.error}`, false);
+                showMessage('categoriesMessage', t('settings.renameFailed', { message: errorText(error) }), false);
                 return;
             }
             categoryNames[index] = newName;
             notifyChange();
-            showMessage('categoriesMessage', 'Category renamed successfully', true);
+            showMessage('categoriesMessage', t('settings.categoryRenamed'), true);
         } catch (error) {
             console.error('Error renaming category:', error);
-            showMessage('categoriesMessage', 'Error renaming category', false);
+            showMessage('categoriesMessage', t('settings.renameError'), false);
         }
     }
 
     async function saveCategories() {
         if (categoryNames.length === 0) {
-            showMessage('categoriesMessage', 'At least one category is required', false);
+            showMessage('categoriesMessage', t('settings.categoryRequired'), false);
             return;
         }
         try {
@@ -90,14 +91,14 @@ export function createSettingsCategories({ categories = [], onChange = () => {} 
                 body: JSON.stringify(categoryNames)
             });
             if (response.ok) {
-                showMessage('categoriesMessage', 'Categories saved successfully', true);
+                showMessage('categoriesMessage', t('settings.categoriesSaved'), true);
             } else {
                 const error = await response.json();
-                showMessage('categoriesMessage', `Failed to save categories: ${error.error}`, false);
+                showMessage('categoriesMessage', t('settings.categoriesFailed', { message: errorText(error) }), false);
             }
         } catch (error) {
             console.error('Error saving categories:', error);
-            showMessage('categoriesMessage', 'Error saving categories', false);
+            showMessage('categoriesMessage', t('settings.categoriesError'), false);
         }
     }
 
@@ -109,9 +110,9 @@ export function createSettingsCategories({ categories = [], onChange = () => {} 
             notifyChange();
             input.value = '';
         } else if (categoryNames.includes(category)) {
-            showMessage('categoriesMessage', 'Category already exists', false);
+            showMessage('categoriesMessage', t('settings.categoryExists'), false);
         } else {
-            showMessage('categoriesMessage', 'Category name cannot be empty.', false);
+            showMessage('categoriesMessage', t('settings.categoryEmpty'), false);
         }
     });
     document.getElementById('saveCategories').addEventListener('click', saveCategories);

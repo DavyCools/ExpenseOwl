@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -82,7 +83,8 @@ func TestMarkupAndBehaviorStaySeparated(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		if entry.IsDir() || strings.HasSuffix(name, "chart.min.js") {
+
+		if entry.IsDir() || strings.HasPrefix(name, "templates/vendor/") || strings.HasSuffix(name, ".min.js") {
 			return nil
 		}
 		source, err := content.ReadFile(name)
@@ -101,4 +103,32 @@ func TestMarkupAndBehaviorStaySeparated(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestLanguageIsRequestLocal(t *testing.T) {
+	var workers sync.WaitGroup
+	for _, language := range []string{"en", "nl", "en", "nl"} {
+		workers.Add(1)
+		go func(language string) {
+			defer workers.Done()
+			recorder := httptest.NewRecorder()
+			if err := ServeTemplate(recorder, "page-settings", language); err != nil {
+				t.Error(err)
+				return
+			}
+			expected := "Language"
+			if language == "nl" {
+				expected = "Taal"
+			}
+			html := recorder.Body.String()
+			if !strings.Contains(html, `lang="`+language+`"`) ||
+				!strings.Contains(html, "<h2 align=\"center\">"+expected+"</h2>") {
+				t.Errorf("incorrect request-local language %s", language)
+			}
+			if strings.Contains(html, "{{") {
+				t.Errorf("untranslated template in %s", language)
+			}
+		}(language)
+	}
+	workers.Wait()
 }

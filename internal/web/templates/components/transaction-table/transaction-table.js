@@ -1,3 +1,4 @@
+import { t, responseError } from '/shared/i18n.js';
 import { cloneTemplate } from '../../shared/dom.js';
 import { formatCurrency } from '../../shared/currency.js';
 import { formatDateFromUTC } from '../../shared/dates.js';
@@ -30,7 +31,7 @@ export function createTransactionTable({ onEdit, onDeleted }) {
         function updateLabel() {
             const label = filters[key].join(', ');
             button.textContent = label ? (label.length > 20 ? label.slice(0, 17) + '...' : label) :
-                (key === 'category' ? 'All categories' : 'All tags');
+                t(key === 'category' ? 'table.allCategories' : 'table.allTags');
         }
         values.forEach(value => {
             const option = cloneTemplate('transaction-filter-option-template');
@@ -62,12 +63,15 @@ export function createTransactionTable({ onEdit, onDeleted }) {
         if (!expenseToDelete) return;
         try {
             const response = await fetch(`/expense/delete?id=${encodeURIComponent(expenseToDelete)}`, { method: 'DELETE' });
-            if (!response.ok) throw new Error('Failed to delete expense');
+            if (!response.ok) {
+                alert(await responseError(response, 'expense.deleteFailed'));
+                return;
+            }
             await onDeleted();
             closeDelete();
         } catch (error) {
             console.error('Error deleting expense:', error);
-            alert('Failed to delete expense. Please try again.');
+            alert(t('expense.deleteFailed'));
         }
     }
     modal.querySelector('[data-cancel-delete]').addEventListener('click', closeDelete);
@@ -110,8 +114,8 @@ export function createTransactionTable({ onEdit, onDeleted }) {
             hasTags = expenses.some(expense => expense.tags && expense.tags.length);
             if (!expenses.length) {
                 const message = cloneTemplate('empty-message-template');
-                message.textContent = (options.timeRange === 'all' ? 'No transactions found' :
-                    'No expenses recorded for this ' + options.timeRange) + options.futureMessage;
+                const emptyKeys = { all: 'table.emptyAll', month: 'table.emptyMonth', year: 'table.emptyYear' };
+                message.textContent = t(emptyKeys[options.timeRange]) + options.futureMessage;
                 container.replaceChildren(message);
                 table = null;
                 return;

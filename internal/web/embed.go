@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/DavyCools/expenseowl/internal/localization"
 )
 
 //go:embed templates
@@ -39,13 +41,31 @@ func GetTemplates() *embed.FS {
 	return &content
 }
 
-func ServeTemplate(w http.ResponseWriter, templateName string) error {
+type PageContext struct {
+	Language string
+	Active   string
+}
+
+func (p PageContext) T(key string) (string, error) {
+	return localization.Text(p.Language, key, nil)
+}
+
+func (p PageContext) ForPage(active string) PageContext {
+	p.Active = active
+	return p
+}
+
+func ServeTemplate(w http.ResponseWriter, templateName string, language ...string) error {
 	parseOnce.Do(parseTemplates)
 	if templateError != nil {
 		return templateError
 	}
 	var output bytes.Buffer
-	if err := pageTemplates.ExecuteTemplate(&output, templateName, nil); err != nil {
+	selected := "en"
+	if len(language) > 0 {
+		selected = localization.Normalize(language[0])
+	}
+	if err := pageTemplates.ExecuteTemplate(&output, templateName, PageContext{Language: selected}); err != nil {
 		return err
 	}
 	_, err := w.Write(output.Bytes())

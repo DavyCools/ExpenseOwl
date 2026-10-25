@@ -45,6 +45,8 @@
     - Category and tag amounts show net spending, with an expense/income breakdown when both are present; the legend includes income-only categories
     - Pie slices use positive net spending; category percentages use gross expenses and tag percentages use the category's positive net spending
     - Disabling a category removes it from pie slices and legend totals and dims its tags, while cashflow continues to show all selected transactions
+    - Category and tag legend amounts show net spending; when both expenses and income occur, the gross expense/income split is shown beside the net amount
+    - The legend total covers the displayed, enabled expense categories, including their refunds; pie slices remain based on gross expenses, while tag percentages use the category's net spending
 2. Table view for detailed expense listing
     - View monthly, yearly, or all expenses chronologically, edit them, and delete them (hold shift to skip confirm)
     - Filter by name, category, tags, amount, or date; category and tag dropdowns support multiple selections with exact category matches and any selected tag
@@ -126,17 +128,38 @@ The frontend uses plain HTML, CSS, and JavaScript modules; no frontend build ste
 
 Run from the repository root with `go run ./cmd/expenseowl`. Since frontend assets are embedded in the binary, restart/rebuild after editing them.
 
-For automatic rebuilding, install [Air](https://github.com/air-verse/air) with `go install github.com/air-verse/air@latest`, then run `air -c .air.toml`. The configuration watches Go, HTML, JavaScript, CSS, and JSON files, excluding temporary builds, stored data, and tests. For automatic browser refresh, run `air -c .air.toml -proxy.enabled true -proxy.app_port 8080 -proxy.proxy_port 8090` and open `http://localhost:8090`.
+For automatic rebuilding, install [Air](https://github.com/air-verse/air) with `go install github.com/air-verse/air@latest`, then run `air -c .air.toml`. The configuration watches Go, HTML, JavaScript, CSS, and JSON files, excluding temporary builds, stored data, tests, and node_modules. For automatic browser refresh, run `air -c .air.toml -proxy.enabled true -proxy.app_port 8080 -proxy.proxy_port 8090` and open `http://localhost:8090`.
 
 Tests live separately from application components:
 
 ```powershell
 go test ./...
-npm --prefix tests\frontend ci
-npm --prefix tests\frontend test
+npm ci
+npm test
 ```
 
-Frontend DOM tests use Node.js 22 or newer and a dev-only dependency under [tests/frontend](tests/frontend); it is not embedded or needed to run the app.
+Frontend DOM tests live under [tests/frontend](tests/frontend) and use Node.js 22 or newer. Install dependencies from the repository root using [package.json](package.json): i18next is an application dependency, while jsdom is a test-only development dependency. Node/npm is not needed to run the app; the pinned i18next ES module is embedded alongside the frontend and imported directly without a global variable.
+
+### Translations
+
+English is the default application language. Settings offers English and Nederlands; the saved `language` preference applies to all browsers. Saving reloads Settings, so save any other edits first. Other open pages adopt the language on their next reload. Month names are translated, while existing numeric date and currency formats are preserved.
+
+The shared [JSON catalogs](internal/localization/locales) supply both Go-rendered HTML and JavaScript messages. [i18next](https://www.i18next.com/) handles browser interpolation and plurals through the [shared wrapper](internal/web/templates/shared/i18n.js). Its assets are served locally, not from a CDN.
+
+If a required catalog cannot be loaded, the page keeps its server-rendered language, shows a translated reload message, and stops interactive initialization rather than mixing languages. Missing individual keys still use the English fallback and emit a diagnostic.
+
+To add a language:
+
+1. Copy `en.json` to a new locale file, such as `fr.json`, under `internal/localization/locales`.
+2. Set its `code` to the filename stem, `name` to the native language name, and `locale` to the appropriate Intl locale (for example, `fr-FR`).
+3. Translate every entry in `translation`, keeping semantic keys and named `{{parameters}}` intact. Use complete sentences, not translated sentence fragments. Language-specific plural variants use i18next's `_one`, `_other`, and other CLDR suffixes.
+4. Run the Go and frontend tests above, then rebuild/restart the app. Embedded catalogs are discovered automatically and appear in the selector; no component changes or database migration are required. Tests reject missing keys and mismatched interpolation parameters.
+
+For new UI text, add a semantic key to every catalog. HTML uses the page context's `T` method; JavaScript uses `t(key, parameters)` after `initI18n()`. Populate text with `textContent` or attributes, never translation-generated HTML. Public API errors expose stable `code`/`params` values for translation while retaining the English `error` field for existing clients. Developer diagnostics stay in logs.
+
+User-entered transaction/category/tag names (including editable seeded categories), brand names, currency codes, and CSV headers/filenames are not translated or rewritten. Native date pickers, file choosers, and alert buttons follow browser/OS language; app-provided labels, validation messages, and alert text follow the saved app language.
+
+The i18next version is pinned in [the root package manifest](package.json). After updating it, run `npm install`, then `npm run vendor` from the repository root. The [vendor script](scripts/vendor.cjs) copies the self-contained ES module and license into the embedded vendor directory; no bundler or CDN is needed. Commit the resulting asset and lockfile changes and rerun the suites. Normal application builds require no npm step.
 
 # Usage
 
@@ -166,6 +189,7 @@ With the exception of [Data backends](#data-backends), all configuration of Expe
   - Recurring transactions will be listed at the bottom of the page and can be edited/removed (all or future only transactions)
   - Recurring transactions allow similar options as normal expenses - category, tags, amount, name
 - Theme Settings: supports light and dark theme, with default behavior to adapt to system
+- Language: English (default) or Nederlands, saved in both JSON and PostgreSQL configuration; shared across browsers
 - Future Transactions:
   - Saved config keys: `showFutureTransactions` and `includeFutureTransactions`
   - Show or hide the future transactions switch on the chart and table (shown by default)

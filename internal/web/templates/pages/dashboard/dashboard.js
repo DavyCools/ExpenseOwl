@@ -1,7 +1,10 @@
+import { initI18n, t } from '/shared/i18n.js';
 import '/shared/pwa.js';
 import { createTransactionControls } from '/components/transaction-controls/transaction-controls.js';
 import { createExpenseForm } from '/components/expense-form/expense-form.js';
 import { createChart } from '/components/chart/chart.js';
+
+await initI18n();
 
 let config = { categories: [], currency: 'usd' };
 let allExpenses = [];
@@ -53,6 +56,12 @@ async function initialize() {
         render();
     } catch (error) {
         console.error('Failed to initialize dashboard:', error);
+        const message = document.getElementById('noDataMessage');
+        message.textContent = t('expense.loadFailed');
+        message.hidden = false;
+        document.querySelector('.chart-box').hidden = true;
+        document.getElementById('customLegend').hidden = true;
+        document.getElementById('cashflow-section').hidden = true;
     }
 }
 
@@ -62,7 +71,7 @@ document.getElementById('toggleExpenseFormBtn').addEventListener('click', event 
     const button = event.currentTarget;
     button.querySelector('i').classList.toggle('fa-plus', container.hidden);
     button.querySelector('i').classList.toggle('fa-times', !container.hidden);
-    button.querySelector('span').textContent = container.hidden ? 'Add Expense' : 'Close';
+    button.querySelector('span').textContent = container.hidden ? t('expense.add') : t('common.close');
 });
 
 initialize();

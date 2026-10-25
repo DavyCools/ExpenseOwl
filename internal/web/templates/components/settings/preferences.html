@@ -1,19 +1,19 @@
 {{define "settings-preferences"}}
 <div class="settings-container">
     <section class="form-container half-width">
-        <h2 align="center">Currency Settings</h2>
+        <h2 align="center">{{.T "settings.currency"}}</h2>
         <div class="currency-selector">
             <select id="currencySelect"></select>
-            <button id="saveCurrency" class="nav-button" type="button">Save</button>
+            <button id="saveCurrency" class="nav-button" type="button">{{.T "common.save"}}</button>
         </div>
         <div id="currencyMessage" class="form-message"></div>
     </section>
 
     <section class="form-container half-width">
-        <h2 align="center">Start Date Settings</h2>
+        <h2 align="center">{{.T "settings.startDate"}}</h2>
         <div class="start-date-manager">
             <input type="number" id="startDate" min="1" max="31" placeholder="1">
-            <button id="saveStartDate" class="nav-button" type="button">Save</button>
+            <button id="saveStartDate" class="nav-button" type="button">{{.T "common.save"}}</button>
         </div>
         <div id="startDateMessage" class="form-message"></div>
     </section>
@@ -22,12 +22,12 @@
 
 {{define "settings-theme"}}
 <section class="form-container half-width">
-        <h2 align="center">Theme Settings</h2>
+        <h2 align="center">{{.T "settings.theme"}}</h2>
         <div class="theme-selector">
             <select id="themeSelect">
-                <option value="system">System Default</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
+                <option value="system">{{.T "settings.system"}}</option>
+                <option value="light">{{.T "settings.light"}}</option>
+                <option value="dark">{{.T "settings.dark"}}</option>
             </select>
         </div>
         <div id="themeMessage" class="form-message"></div>
@@ -36,19 +36,31 @@
 
 {{define "settings-future"}}
 <section class="form-container">
-    <h2 align="center">Future Transactions</h2>
+    <h2 align="center">{{.T "settings.future"}}</h2>
     <div class="future-transactions-settings">
         <label>
             <input type="checkbox" id="showFutureTransactions" disabled>
-            Show the future transactions switch on the chart and table
+            {{.T "settings.futureShow"}}
         </label>
         <label>
             <input type="checkbox" id="includeFutureTransactions" disabled>
-            Include future transactions by default
+            {{.T "settings.futureInclude"}}
         </label>
-        <p>The default applies when opening the chart or table, even when the switch is hidden.</p>
-        <button id="saveFutureTransactionsSettings" class="nav-button" type="button" disabled>Save</button>
+        <p>{{.T "settings.futureHelp"}}</p>
+        <button id="saveFutureTransactionsSettings" class="nav-button" type="button" disabled>{{.T "common.save"}}</button>
     </div>
     <div id="futureTransactionsMessage" class="form-message"></div>
+</section>
+{{end}}
+
+{{define "settings-language"}}
+<section class="form-container">
+    <h2 align="center">{{.T "settings.language"}}</h2>
+    <div class="currency-selector">
+        <select id="languageSelect" aria-label="{{.T "settings.language"}}" disabled></select>
+        <button id="saveLanguage" class="nav-button" type="button" disabled>{{.T "common.save"}}</button>
+    </div>
+    <p>{{.T "settings.languageHelp"}}</p>
+    <div id="languageMessage" class="form-message"></div>
 </section>
 {{end}}

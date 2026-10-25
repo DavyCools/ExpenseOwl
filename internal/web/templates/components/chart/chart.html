@@ -1,6 +1,6 @@
 {{define "chart"}}
 <div class="chart-container">
-    <div id="noDataMessage" class="no-data" hidden>No expenses recorded this time period.</div>
+    <div id="noDataMessage" class="no-data" hidden>{{.T "chart.empty"}}</div>
     <div class="chart-box">
         <canvas id="categoryPieChart"></canvas>
     </div>
@@ -8,21 +8,21 @@
 </div>
 <div id="cashflow-section" class="cashflow-container">
     <div class="cashflow-item income">
-        <div class="cashflow-label">Income</div>
+        <div class="cashflow-label">{{.T "chart.income"}}</div>
         <div class="cashflow-value" id="cashflow-income"></div>
     </div>
     <div class="cashflow-item expenses">
-        <div class="cashflow-label">Expenses</div>
+        <div class="cashflow-label">{{.T "chart.expenses"}}</div>
         <div class="cashflow-value" id="cashflow-expenses"></div>
     </div>
     <div class="cashflow-item balance">
-        <div class="cashflow-label">Balance</div>
+        <div class="cashflow-label">{{.T "chart.balance"}}</div>
         <div class="cashflow-value" id="cashflow-balance"></div>
     </div>
 </div>
 <template id="chart-tags-toggle-template">
     <div class="legend-tags-toggle">
-        <label><input type="checkbox">Show tags</label>
+        <label><input type="checkbox">{{.T "chart.showTags"}}</label>
     </div>
 </template>
 <template id="chart-category-template">
@@ -46,7 +46,7 @@
 <template id="chart-total-template">
     <div class="legend-total">
         <div class="legend-total-row">
-            <span>Total:</span>
+            <span>{{.T "chart.total"}}</span>
             <span class="amount"></span>
         </div>
     </div>

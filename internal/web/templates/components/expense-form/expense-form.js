@@ -1,3 +1,4 @@
+import { t, errorText, clearFormValidation } from '/shared/i18n.js';
 import { populateOptions } from '../../shared/dom.js';
 import { getISODateWithLocalTime, localDateInput } from '../../shared/dates.js';
 import { showMessage } from '../../shared/messages.js';
@@ -14,9 +15,6 @@ export function createExpenseForm({ getCategories, getTags, onSaved }) {
         getAvailableTags: getTags,
     });
     field('date').value = localDateInput();
-    field('name').addEventListener('click', event => {
-        if (event.target.value === '-') event.target.value = '';
-    });
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const editId = form.dataset.editId;
@@ -37,24 +35,25 @@ export function createExpenseForm({ getCategories, getTags, onSaved }) {
             });
             if (!response.ok) {
                 const error = await response.json();
-                showMessage('formMessage', `Error: ${error.error || 'Failed to save expense'}`, false);
+                showMessage('formMessage', t('common.error', { message: errorText(error, 'expense.saveFailed') }), false);
                 return;
             }
-            showMessage('formMessage', editId ? 'Expense updated successfully!' : 'Expense added successfully!', true);
+            showMessage('formMessage', editId ? t('expense.updated') : t('expense.added'), true);
             form.reset();
             tags.clear();
             delete form.dataset.editId;
-            submit.textContent = 'Add Expense';
+            submit.textContent = t('expense.add');
             await onSaved();
             field('date').value = localDateInput();
         } catch (error) {
             console.error('Error saving expense:', error);
-            showMessage('formMessage', 'Error: Failed to save expense', false);
+            showMessage('formMessage', t('common.error', { message: t('expense.saveFailed') }), false);
         }
     });
     return {
         refresh(config) { populateOptions(field('category'), config.categories || getCategories()); },
         edit(expense) {
+            clearFormValidation(form);
             field('name').value = expense.name;
             field('category').value = expense.category;
             field('amount').value = Math.abs(expense.amount);
@@ -62,7 +61,7 @@ export function createExpenseForm({ getCategories, getTags, onSaved }) {
             field('date').value = localDateInput(new Date(expense.date));
             tags.render(expense.tags || []);
             form.dataset.editId = expense.id;
-            submit.textContent = 'Update Expense';
+            submit.textContent = t('expense.update');
             form.scrollIntoView({ behavior: 'smooth' });
         },
     };

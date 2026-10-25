@@ -3,19 +3,19 @@
 <template id="transaction-table-template">
     <table class="expense-table">
         <thead>
-            <tr><th>Name</th><th>Category</th><th class="tags-column" data-tags>Tags</th><th>Amount</th><th class="date-header">Date</th><th></th></tr>
+            <tr><th>{{.T "common.name"}}</th><th>{{.T "common.category"}}</th><th class="tags-column" data-tags>{{.T "common.tags"}}</th><th>{{.T "common.amount"}}</th><th class="date-header">{{.T "common.date"}}</th><th></th></tr>
             <tr class="filter-row">
-                <th><input type="text" id="filter-name" data-filter="name" class="form-filter-input" placeholder="Filter"></th>
+                <th><input type="text" id="filter-name" data-filter="name" class="form-filter-input" placeholder="{{.T "common.filter"}}"></th>
                 <th><div class="custom-multiselect" id="filter-category-container" data-multiselect="category">
-                    <button type="button" class="multiselect-display" id="filter-category-display" aria-expanded="false">All categories</button>
+                    <button type="button" class="multiselect-display" id="filter-category-display" aria-expanded="false">{{.T "table.allCategories"}}</button>
                     <div class="multiselect-dropdown" id="filter-category-dropdown" hidden></div>
                 </div></th>
                 <th class="tags-column" data-tags><div class="custom-multiselect" id="filter-tags-container" data-multiselect="tags">
-                    <button type="button" class="multiselect-display" id="filter-tags-display" aria-expanded="false">All tags</button>
+                    <button type="button" class="multiselect-display" id="filter-tags-display" aria-expanded="false">{{.T "table.allTags"}}</button>
                     <div class="multiselect-dropdown" id="filter-tags-dropdown" hidden></div>
                 </div></th>
-                <th><input type="number" id="filter-amount" data-filter="amount" class="form-filter-input" placeholder="Filter"></th>
-                <th class="date-header"><input type="date" id="filter-date" data-filter="date" class="form-filter-input" placeholder="Filter"></th>
+                <th><input type="number" id="filter-amount" data-filter="amount" class="form-filter-input" placeholder="{{.T "common.filter"}}"></th>
+                <th class="date-header"><input type="date" id="filter-date" data-filter="date" class="form-filter-input" placeholder="{{.T "common.filter"}}"></th>
                 <th></th>
             </tr>
         </thead>
@@ -30,19 +30,19 @@
         <td data-name></td><td data-category></td><td class="tags-column" data-tags></td>
         <td class="amount" data-amount></td><td class="date-column" data-date></td>
         <td>
-            <button class="edit-button" data-edit><i class="fa-solid fa-pen-to-square"></i></button>
-            <button class="delete-button" data-delete><i class="fa-solid fa-trash-can"></i></button>
+            <button class="edit-button" data-edit aria-label="{{.T "common.edit"}}"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="delete-button" data-delete aria-label="{{.T "common.delete"}}"><i class="fa-solid fa-trash-can"></i></button>
         </td>
     </tr>
 </template>
-<template id="transaction-empty-row-template"><tr><td class="no-data filtered-empty">No transactions found with current filters.</td></tr></template>
+<template id="transaction-empty-row-template"><tr><td class="no-data filtered-empty">{{.T "table.emptyFiltered"}}</td></tr></template>
 <div id="deleteModal" class="modal">
     <div class="modal-content">
-        <h3>Delete Expense</h3>
-        <p>Are you sure you want to delete this expense? (cannot be undone)</p>
+        <h3>{{.T "table.deleteTitle"}}</h3>
+        <p>{{.T "table.deleteConfirm"}}</p>
         <div class="modal-buttons">
-            <button class="modal-button" data-cancel-delete>Cancel</button>
-            <button class="modal-button confirm" data-confirm-delete>Delete</button>
+            <button class="modal-button" data-cancel-delete>{{.T "common.cancel"}}</button>
+            <button class="modal-button confirm" data-confirm-delete>{{.T "common.delete"}}</button>
         </div>
     </div>
 </div>

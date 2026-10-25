@@ -1,3 +1,4 @@
+import { t, errorText, responseError, clearFormValidation } from '/shared/i18n.js';
 import { formatCurrency } from '/shared/currency.js';
 import { cloneTemplate, populateOptions } from '/shared/dom.js';
 import { getISODateWithLocalTime, localDateInput } from '/shared/dates.js';
@@ -50,7 +51,7 @@ export function createSettingsRecurringTransactions({
             let occurrencesCount = 0;
             while (nextDate < today) {
                 occurrencesCount++;
-                if (occurrencesCount >= expense.occurrences) return 'Finished';
+                if (occurrencesCount >= expense.occurrences) return t('recurring.finished');
                 advanceDate(nextDate, expense.interval);
             }
             return nextDate.toLocaleDateString();
@@ -81,7 +82,7 @@ export function createSettingsRecurringTransactions({
             row.querySelector('[data-field="name"]').textContent = expense.name;
             row.querySelector('[data-field="amount"]').textContent = formatCurrency(expense.amount, currentCurrency);
             row.querySelector('[data-field="category"]').textContent = expense.category;
-            row.querySelector('[data-field="interval"]').textContent = `${expense.interval.charAt(0).toUpperCase()}${expense.interval.slice(1)}`;
+            row.querySelector('[data-field="interval"]').textContent = t(`common.${expense.interval}`);
             row.querySelector('[data-field="next-occurrence"]').textContent = findNextOccurrence(expense);
             row.querySelector('[data-action="edit-recurring"]').dataset.id = expense.id;
             row.querySelector('[data-action="show-delete"]').dataset.id = expense.id;
@@ -118,12 +119,15 @@ export function createSettingsRecurringTransactions({
         if (!expenseToDelete) return;
         try {
             const response = await fetch(`/recurring-expense/delete?id=${encodeURIComponent(expenseToDelete)}&removeAll=${removeAll}`, { method: 'DELETE' });
-            if (!response.ok) throw new Error('Failed to delete recurring expense');
-            showMessage('recurringExpenseMessage', 'Recurring expense deleted successfully', true);
+            if (!response.ok) {
+                showMessage('recurringExpenseMessage', await responseError(response, 'recurring.deleteFailed'), false);
+                return;
+            }
+            showMessage('recurringExpenseMessage', t('recurring.deleted'), true);
             await fetchAndRender();
         } catch (error) {
             console.error('Error deleting recurring expense:', error);
-            showMessage('recurringExpenseMessage', 'Failed to delete recurring expense', false);
+            showMessage('recurringExpenseMessage', t('recurring.deleteFailed'), false);
         } finally {
             closeDeleteModal();
         }
@@ -132,6 +136,7 @@ export function createSettingsRecurringTransactions({
     function openEditModal(id) {
         expenseToEdit = expenses.find(expense => String(expense.id) === String(id));
         if (!expenseToEdit) return;
+        clearFormValidation(document.getElementById('editRecurringExpenseForm'));
         document.getElementById('editRecurringName').value = expenseToEdit.name;
         document.getElementById('editRecurringAmount').value = Math.abs(expenseToEdit.amount);
         document.getElementById('editRecurringReportGain').checked = expenseToEdit.amount > 0;
@@ -170,12 +175,15 @@ export function createSettingsRecurringTransactions({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedData)
             });
-            if (!response.ok) throw new Error('Failed to update recurring expense');
-            showMessage('recurringExpenseMessage', 'Recurring expense updated successfully', true);
+            if (!response.ok) {
+                showMessage('recurringExpenseMessage', await responseError(response, 'recurring.updateFailed'), false);
+                return;
+            }
+            showMessage('recurringExpenseMessage', t('recurring.updated'), true);
             await fetchAndRender();
         } catch (error) {
             console.error('Error updating recurring expense:', error);
-            showMessage('recurringExpenseMessage', 'Failed to update recurring expense', false);
+            showMessage('recurringExpenseMessage', t('recurring.updateFailed'), false);
         } finally {
             closeEditModal();
         }
@@ -202,7 +210,7 @@ export function createSettingsRecurringTransactions({
                 body: JSON.stringify(formData)
             });
             if (response.ok) {
-                showMessage('recurringExpenseMessage', 'Recurring expense added successfully!', true);
+                showMessage('recurringExpenseMessage', t('recurring.added'), true);
                 document.getElementById('recurringExpenseForm').reset();
                 addTagInput.clear();
                 document.getElementById('recurringStartDate').value = localDateInput();
@@ -210,11 +218,11 @@ export function createSettingsRecurringTransactions({
                 await fetchAndRender();
             } else {
                 const error = await response.json();
-                showMessage('recurringExpenseMessage', `Error: ${error.error || 'Failed to add recurring expense'}`, false);
+                showMessage('recurringExpenseMessage', t('common.error', { message: errorText(error, 'recurring.addFailed') }), false);
             }
         } catch (error) {
             console.error('Error adding recurring expense:', error);
-            showMessage('recurringExpenseMessage', 'Error: Failed to add recurring expense', false);
+            showMessage('recurringExpenseMessage', t('common.error', { message: t('recurring.addFailed') }), false);
         }
     });
 

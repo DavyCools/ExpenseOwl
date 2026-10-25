@@ -1,3 +1,4 @@
+import { t, errorText, responseError } from '/shared/i18n.js';
 import { currencyBehaviors } from '/shared/currency.js';
 import { cloneTemplate } from '/shared/dom.js';
 import { showMessage } from '/shared/messages.js';
@@ -42,13 +43,13 @@ export function createSettingsPreferences(config = {}, { onCurrencyChange = () =
             if (response.ok) {
                 currentCurrency = currencyCode;
                 onCurrencyChange(currencyCode);
-                showMessage('currencyMessage', 'Currency saved successfully', true);
+                showMessage('currencyMessage', t('settings.currencySaved'), true);
             } else {
-                showMessage('currencyMessage', 'Failed to save currency', false);
+                showMessage('currencyMessage', await responseError(response, 'settings.currencyFailed'), false);
             }
         } catch (error) {
             console.error('Error saving currency:', error);
-            showMessage('currencyMessage', 'Error saving currency', false);
+            showMessage('currencyMessage', t('settings.currencyError'), false);
         }
     });
 
@@ -61,10 +62,11 @@ export function createSettingsPreferences(config = {}, { onCurrencyChange = () =
                 body: JSON.stringify(parseInt(startDateValue, 10))
             });
             if (response.ok) currentStartDate = parseInt(startDateValue, 10);
-            showMessage('startDateMessage', response.ok ? 'Start date saved successfully' : 'Failed to save start date', response.ok);
+            showMessage('startDateMessage', response.ok ? t('settings.startDateSaved') :
+                await responseError(response, 'settings.startDateFailed'), response.ok);
         } catch (error) {
             console.error('Error saving start date:', error);
-            showMessage('startDateMessage', 'Error saving start date', false);
+            showMessage('startDateMessage', t('settings.startDateError'), false);
         }
     });
 
@@ -82,12 +84,13 @@ export function createSettingsPreferences(config = {}, { onCurrencyChange = () =
             });
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || 'Failed to save future transaction settings');
+                showMessage('futureTransactionsMessage', errorText(error, 'errors.futureSave'), false);
+                return;
             }
-            showMessage('futureTransactionsMessage', 'Future transaction settings saved successfully', true);
+            showMessage('futureTransactionsMessage', t('settings.futureSaved'), true);
         } catch (error) {
             console.error('Error saving future transaction settings:', error);
-            showMessage('futureTransactionsMessage', error.message, false);
+            showMessage('futureTransactionsMessage', t('errors.futureSave'), false);
         } finally {
             button.disabled = false;
         }
@@ -100,9 +103,54 @@ export function createSettingsPreferences(config = {}, { onCurrencyChange = () =
         localStorage.setItem('theme', theme);
         if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
         else document.documentElement.removeAttribute('data-theme');
-        showMessage('themeMessage', 'Theme updated successfully.', true);
+        showMessage('themeMessage', t('settings.themeSaved'), true);
     });
 
     updateConfig(config);
-    return { updateConfig, getCurrency: () => currentCurrency, getStartDate: () => currentStartDate };
+    const languageSelect = document.getElementById('languageSelect');
+    const saveLanguage = document.getElementById('saveLanguage');
+    async function loadLanguages() {
+        try {
+            const response = await fetch('/locales/');
+            if (!response.ok) throw new Error('Unable to fetch supported languages');
+            const languages = await response.json();
+            languageSelect.replaceChildren(...languages.map(language => {
+                const option = cloneTemplate('option-template');
+                option.value = language.code;
+                option.textContent = language.name;
+                return option;
+            }));
+            languageSelect.value = config.language || 'en';
+            languageSelect.disabled = false;
+            saveLanguage.disabled = false;
+        } catch (error) {
+            console.error('Unable to initialize language preference', error);
+            showMessage('languageMessage', t('settings.languageFailed'), false);
+        }
+    }
+    saveLanguage.addEventListener('click', async () => {
+        saveLanguage.disabled = true;
+        languageSelect.disabled = true;
+        try {
+            const response = await fetch('/language/edit', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(languageSelect.value)
+            });
+            if (!response.ok) {
+                showMessage('languageMessage', await responseError(response, 'settings.languageFailed'), false);
+                return;
+            }
+            showMessage('languageMessage', t('settings.languageSaved'), true);
+            window.location.reload();
+        } catch (error) {
+            console.error('Unable to save language preference', error);
+            showMessage('languageMessage', t('settings.languageFailed'), false);
+        } finally {
+            saveLanguage.disabled = false;
+            languageSelect.disabled = false;
+        }
+    });
+    const ready = loadLanguages();
+    return { updateConfig, ready, getCurrency: () => currentCurrency, getStartDate: () => currentStartDate };
 }

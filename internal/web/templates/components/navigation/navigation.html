@@ -1,10 +1,10 @@
 {{define "navigation"}}
 <header>
     <div class="nav-bar">
-        <a href="/"><img class="navigation-logo" src="/icons/icon-192.png" alt="ExpenseOwl Logo" height="85"></a>
-        <a href="/" class="view-button{{if eq . "dashboard"}} active{{end}}" data-tooltip="Dashboard"><i class="fa-solid fa-chart-pie"></i></a>
-        <a href="/table" class="view-button{{if eq . "table"}} active{{end}}" data-tooltip="Table View"><i class="fa-solid fa-table"></i></a>
-        <a href="/settings" class="view-button{{if eq . "settings"}} active{{end}}" data-tooltip="Settings"><i class="fa-solid fa-gear"></i></a>
+        <a href="/"><img class="navigation-logo" src="/icons/icon-192.png" alt="{{.T "navigation.logo"}}" height="85"></a>
+        <a href="/" class="view-button{{if eq .Active "dashboard"}} active{{end}}" aria-label="{{.T "navigation.dashboard"}}" data-tooltip="{{.T "navigation.dashboard"}}"><i class="fa-solid fa-chart-pie"></i></a>
+        <a href="/table" class="view-button{{if eq .Active "table"}} active{{end}}" aria-label="{{.T "navigation.table"}}" data-tooltip="{{.T "navigation.table"}}"><i class="fa-solid fa-table"></i></a>
+        <a href="/settings" class="view-button{{if eq .Active "settings"}} active{{end}}" aria-label="{{.T "navigation.settings"}}" data-tooltip="{{.T "navigation.settings"}}"><i class="fa-solid fa-gear"></i></a>
     </div>
 </header>
 {{end}}

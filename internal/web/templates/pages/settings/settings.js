@@ -1,7 +1,10 @@
+import { initI18n, t } from '/shared/i18n.js';
 import { createSettingsCategories } from '/components/settings/categories.js';
 import { createSettingsImportExport } from '/components/settings/import-export.js';
 import { createSettingsPreferences } from '/components/settings/preferences.js';
 import { createSettingsRecurringTransactions } from '/components/settings/recurring-transactions.js';
+
+await initI18n();
 
 let config = {};
 let expenses = [];
@@ -58,7 +61,7 @@ async function loadSettings() {
         console.error('Failed to initialize settings:', error);
         const message = document.getElementById('categoriesMessage');
         if (message) {
-            message.textContent = 'Failed to load settings';
+            message.textContent = t('settings.loadFailed');
             message.className = 'form-message error';
         }
     }

@@ -1,0 +1,15 @@
+{
+  "name": "expenseowl-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules --test tests/frontend/*.test.js",
+    "vendor": "node scripts/vendor.cjs"
+  },
+  "dependencies": {
+    "i18next": "25.6.3"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}

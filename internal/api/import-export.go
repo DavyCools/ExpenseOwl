@@ -16,12 +16,12 @@ import (
 // exports all expenses to CSV
 func (h *Handler) ExportCSV(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		writeJSON(w, http.StatusMethodNotAllowed, ErrorResponse{Error: "Method not allowed"})
+		writeJSON(w, http.StatusMethodNotAllowed, apiError("errors.method", nil))
 		return
 	}
 	expenses, err := h.storage.GetAllExpenses()
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Failed to retrieve expenses"})
+		writeJSON(w, http.StatusInternalServerError, apiError("errors.expensesRetrieve", nil))
 		log.Printf("API ERROR: Failed to retrieve expenses for CSV export: %v\n", err)
 		return
 	}
@@ -59,27 +59,27 @@ func (h *Handler) ExportCSV(w http.ResponseWriter, r *http.Request) {
 // imports expenses from CSV
 func (h *Handler) ImportCSV(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		writeJSON(w, http.StatusMethodNotAllowed, ErrorResponse{Error: "Method not allowed"})
+		writeJSON(w, http.StatusMethodNotAllowed, apiError("errors.method", nil))
 		return
 	}
 	if err := r.ParseMultipartForm(10 << 20); err != nil { // 10MB max file size
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Could not parse multipart form"})
+		writeJSON(w, http.StatusBadRequest, apiError("errors.multipart", nil))
 		return
 	}
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Error retrieving the file"})
+		writeJSON(w, http.StatusBadRequest, apiError("errors.file", nil))
 		return
 	}
 	defer file.Close()
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Failed to read CSV file"})
+		writeJSON(w, http.StatusBadRequest, apiError("errors.csvRead", nil))
 		return
 	}
 	if len(records) < 2 {
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "CSV file must have a header and at least one data row"})
+		writeJSON(w, http.StatusBadRequest, apiError("errors.csvEmpty", nil))
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *Handler) ImportCSV(w http.ResponseWriter, r *http.Request) {
 	requiredCols := []string{"name", "category", "amount", "date"}
 	for _, col := range requiredCols {
 		if _, ok := colMap[col]; !ok {
-			writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: fmt.Sprintf("Missing required column: %s", col)})
+			writeJSON(w, http.StatusBadRequest, apiError("errors.csvColumn", map[string]any{"column": col}))
 			return
 		}
 	}
@@ -103,7 +103,7 @@ func (h *Handler) ImportCSV(w http.ResponseWriter, r *http.Request) {
 
 	currentCategories, err := h.storage.GetCategories()
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Could not retrieve current categories"})
+		writeJSON(w, http.StatusInternalServerError, apiError("errors.currentCategories", nil))
 		return
 	}
 	categorySet := make(map[string]bool)
@@ -116,7 +116,7 @@ func (h *Handler) ImportCSV(w http.ResponseWriter, r *http.Request) {
 	currencyVal, err := h.storage.GetCurrency()
 	if err != nil {
 		log.Printf("Error: Could not retrieve currency, shutting down import: %v\n", err)
-		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Could not retrieve currency"})
+		writeJSON(w, http.StatusInternalServerError, apiError("errors.currentCurrency", nil))
 		return
 	}
 

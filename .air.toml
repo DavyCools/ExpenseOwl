@@ -7,4 +7,4 @@ tmp_dir = "tmp"
   full_bin = "./tmp/main.exe"
   delay = 1000
   include_ext = ["go", "html", "js", "css", "json"]
-  exclude_dir = ["tmp", "data", "tests"]
+  exclude_dir = ["tmp", "data", "tests", "node_modules"]

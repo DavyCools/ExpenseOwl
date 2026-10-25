@@ -1,13 +1,13 @@
 {{define "settings-categories"}}
 <section class="form-container">
-    <h2 align="center">Category Settings</h2>
+    <h2 align="center">{{.T "settings.categories"}}</h2>
     <div id="categories-manager">
         <div id="categories-list" class="categories-list"></div>
         <div class="category-input-container">
-            <input type="text" id="newCategory" placeholder="Add new category">
-            <button id="addCategory" class="nav-button" type="button">Add</button>
+            <input type="text" id="newCategory" placeholder="{{.T "settings.newCategory"}}">
+            <button id="addCategory" class="nav-button" type="button">{{.T "common.add"}}</button>
         </div>
-        <button id="saveCategories" class="nav-button" type="button">Save Categories</button>
+        <button id="saveCategories" class="nav-button" type="button">{{.T "settings.saveCategories"}}</button>
         <div id="categoriesMessage" class="form-message"></div>
     </div>
 </section>
@@ -20,16 +20,16 @@
             <input type="text" class="category-rename-input" hidden>
         </div>
         <div class="category-actions">
-            <button class="edit-button" type="button" data-action="rename" data-tooltip="Rename">
+            <button class="edit-button" type="button" data-action="rename" aria-label="{{.T "common.rename"}}" data-tooltip="{{.T "common.rename"}}">
                 <i class="fa-solid fa-pen"></i>
             </button>
-            <button class="save-rename-button" type="button" data-action="save-rename" data-tooltip="Save" hidden>
+            <button class="save-rename-button" type="button" data-action="save-rename" aria-label="{{.T "common.save"}}" data-tooltip="{{.T "common.save"}}" hidden>
                 <i class="fa-solid fa-check"></i>
             </button>
-            <button class="cancel-rename-button" type="button" data-action="cancel-rename" data-tooltip="Cancel" hidden>
+            <button class="cancel-rename-button" type="button" data-action="cancel-rename" aria-label="{{.T "common.cancel"}}" data-tooltip="{{.T "common.cancel"}}" hidden>
                 <i class="fa-solid fa-times"></i>
             </button>
-            <button class="delete-button" type="button" data-action="delete" data-tooltip="Delete">
+            <button class="delete-button" type="button" data-action="delete" aria-label="{{.T "common.delete"}}" data-tooltip="{{.T "common.delete"}}">
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>

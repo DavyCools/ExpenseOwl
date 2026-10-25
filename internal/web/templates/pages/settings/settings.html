@@ -1,6 +1,6 @@
 {{define "page-settings"}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,16 +13,17 @@
     <link rel="stylesheet" href="/components/modal/modal.css">
     <link rel="stylesheet" href="/shared/overrides.css">
     <script src="/theme.js" defer></script>
-    <title>ExpenseOwl Settings</title>
+    <title>{{.T "page.settings"}}</title>
 </head>
 <body>
+    <p id="translationError" class="form-message error" hidden>{{.T "translations.loadFailed"}}</p>
     <div class="container">
-        {{template "navigation" "settings"}}
+        {{template "navigation" (.ForPage "settings")}}
 
         <div class="info-field">
-            Version: <a id="version-link" href="https://github.com/DavyCools/expenseowl/releases/latest" target="_blank" rel="noopener noreferrer">v1.1</a>
+            {{.T "page.version"}} <a id="version-link" href="https://github.com/DavyCools/expenseowl/releases/latest" target="_blank" rel="noopener noreferrer">v1.1</a>
             <span class="separator">|</span>
-            <a href="https://github.com/DavyCools/expenseowl/blob/main/README.md" target="_blank" rel="noopener noreferrer">Documentation</a>
+            <a href="https://github.com/DavyCools/expenseowl/blob/main/README.md" target="_blank" rel="noopener noreferrer">{{.T "page.documentation"}}</a>
             <span class="separator">|</span>
             <a href="https://github.com/DavyCools/expenseowl" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
@@ -33,6 +34,7 @@
             {{template "settings-theme" .}}
             {{template "settings-import-export" .}}
         </div>
+        {{template "settings-language" .}}
         {{template "settings-future" .}}
         {{template "settings-recurring-transactions" .}}
     </div>

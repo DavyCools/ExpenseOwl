@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/DavyCools/expenseowl/internal/localization"
 )
 
 // Storage interface for all storage types
@@ -23,6 +25,7 @@ type Storage interface {
 	GetStartDate() (int, error)
 	UpdateStartDate(startDate int) error
 	UpdateFutureTransactionsSettings(showSwitch, includeByDefault bool) error
+	UpdateLanguage(language string) error
 
 	// Recurring Expenses
 	GetRecurringExpenses() ([]RecurringExpense, error)
@@ -47,6 +50,7 @@ type Storage interface {
 
 // config for expense data
 type Config struct {
+	Language                  string             `json:"language"`
 	Categories                []string           `json:"categories"`
 	Currency                  string             `json:"currency"`
 	StartDate                 int                `json:"startDate"`
@@ -97,6 +101,7 @@ type Expense struct {
 }
 
 func (c *Config) SetBaseConfig() {
+	c.Language = "en"
 	c.Categories = defaultCategories
 	c.Currency = "usd"
 	c.StartDate = 1
@@ -167,7 +172,7 @@ func SanitizeString(s string) string {
 func ValidateCategory(category string) (string, error) {
 	sanitized := SanitizeString(category)
 	if sanitized == "" {
-		return "", fmt.Errorf("category name cannot be empty or contain only invalid characters")
+		return "", localization.NewError("errors.categoryEmpty", nil)
 	}
 	return sanitized, nil
 }
@@ -175,13 +180,13 @@ func ValidateCategory(category string) (string, error) {
 func (e *Expense) Validate() error {
 	e.Name = SanitizeString(e.Name)
 	if e.Name == "" {
-		return fmt.Errorf("expense 'name' cannot be empty")
+		return localization.NewError("errors.expenseName", nil)
 	}
 	if e.Category == "" {
-		return fmt.Errorf("expense 'category' cannot be empty")
+		return localization.NewError("errors.expenseCategory", nil)
 	}
 	if e.Amount == 0 {
-		return fmt.Errorf("expense 'amount' cannot be 0")
+		return localization.NewError("errors.expenseAmount", nil)
 	}
 	// if e.Currency == "" {
 	// 	return fmt.Errorf("expense 'currency' cannot be empty")
@@ -197,7 +202,7 @@ func (e *Expense) Validate() error {
 		e.Tags = cleanedTags
 	}
 	if e.Date.IsZero() {
-		return fmt.Errorf("expense 'date' cannot be empty")
+		return localization.NewError("errors.expenseDate", nil)
 	}
 	return nil
 }
@@ -205,10 +210,10 @@ func (e *Expense) Validate() error {
 func (e *RecurringExpense) Validate() error {
 	e.Name = SanitizeString(e.Name)
 	if e.Name == "" {
-		return fmt.Errorf("recurring expense 'name' cannot be empty")
+		return localization.NewError("errors.recurringName", nil)
 	}
 	if e.Category == "" {
-		return fmt.Errorf("recurring expense 'category' cannot be empty")
+		return localization.NewError("errors.recurringCategory", nil)
 	}
 	if len(e.Tags) > 0 {
 		var cleanedTags []string
@@ -221,10 +226,10 @@ func (e *RecurringExpense) Validate() error {
 		e.Tags = cleanedTags
 	}
 	if e.Occurrences < 2 {
-		return fmt.Errorf("at least 2 occurences required to recur")
+		return localization.NewError("errors.occurrences", nil)
 	}
 	if e.StartDate.IsZero() {
-		return fmt.Errorf("start date for recurring expense must be specified")
+		return localization.NewError("errors.recurringStart", nil)
 	}
 	validIntervals := map[string]bool{
 		"daily":   true,
@@ -233,7 +238,7 @@ func (e *RecurringExpense) Validate() error {
 		"yearly":  true,
 	}
 	if !validIntervals[e.Interval] {
-		return fmt.Errorf("invalid interval: '%s'. Must be one of 'daily', 'weekly', 'monthly', or 'yearly'", e.Interval)
+		return localization.NewError("errors.interval", map[string]any{"interval": e.Interval})
 	}
 	return nil
 }

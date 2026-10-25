@@ -30,8 +30,9 @@ test('chart, legend and cashflow share the supplied transaction selection', asyn
     chart.destroy();
 });
 
-test('main chart behavior survives extraction: gains, net slices, tags and disabled categories', async t => {
-    const app = await browser(['components/chart/chart.html']);
+for (const language of ['en', 'nl']) {
+test(`${language}: main chart behavior survives localization: gains, net slices, tags and disabled categories`, async t => {
+    const app = await browser(['components/chart/chart.html'], language);
     t.after(app.close);
     let config;
     app.window.Chart = class {
@@ -103,3 +104,4 @@ test('main chart behavior survives extraction: gains, net slices, tags and disab
     assert.equal(app.document.getElementById('noDataMessage').hidden, false);
     assert.equal(app.document.getElementById('customLegend').hidden, true);
 });
+}

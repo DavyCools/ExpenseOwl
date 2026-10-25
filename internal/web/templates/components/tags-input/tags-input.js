@@ -1,4 +1,5 @@
 import { cloneTemplate } from '../../shared/dom.js';
+import { t } from '../../shared/i18n.js';
 
 export function createTagInput({
     input, selectedContainer, dropdown, getAvailableTags,
@@ -14,7 +15,17 @@ export function createTagInput({
         selectedContainer.replaceChildren(...Array.from(selectedTags, tag => {
             const pill = cloneTemplate('tag-pill-template');
             pill.querySelector('[data-tag-name]').textContent = tag;
-            pill.querySelector('.remove-tag').addEventListener('click', event => {
+            const remove = pill.querySelector('.remove-tag');
+            remove.setAttribute('aria-label', t('tags.remove', { tag }));
+            remove.setAttribute('role', 'button');
+            remove.tabIndex = 0;
+            remove.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    remove.click();
+                }
+            }, options);
+            remove.addEventListener('click', event => {
                 event.stopPropagation();
                 selectedTags.delete(tag);
                 render();
@@ -37,7 +48,7 @@ export function createTagInput({
         const nodes = [];
         if (value && !allTags.some(tag => tag.toLowerCase() === value)) {
             const item = cloneTemplate('tag-create-template');
-            item.textContent = `+ Create "${input.value.trim()}"`;
+            item.textContent = t('tags.create', { tag: input.value.trim() });
             item.addEventListener('click', () => addTag(input.value), options);
             nodes.push(item);
         }

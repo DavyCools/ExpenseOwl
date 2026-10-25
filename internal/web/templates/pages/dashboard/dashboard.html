@@ -1,6 +1,6 @@
 {{define "page-dashboard"}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,16 +18,17 @@
     <link rel="stylesheet" href="/components/chart/chart.css">
     <link rel="stylesheet" href="/shared/overrides.css">
     <script src="/theme.js" defer></script>
-    <title>ExpenseOwl Dashboard</title>
+    <title>{{.T "page.dashboard"}}</title>
     <script src="/chart.min.js"></script>
     <script type="module" src="/pages/dashboard/dashboard.js"></script>
 </head>
 <body>
+    <p id="translationError" class="form-message error" hidden>{{.T "translations.loadFailed"}}</p>
     <div class="container">
-        {{template "navigation" "dashboard"}}
+        {{template "navigation" (.ForPage "dashboard")}}
         {{template "transaction-controls" .}}
         <div class="table-controls">
-            <button id="toggleExpenseFormBtn" class="nav-button"><i class="fa-solid fa-plus"></i> <span>Add Expense</span></button>
+            <button id="toggleExpenseFormBtn" class="nav-button"><i class="fa-solid fa-plus"></i> <span>{{.T "expense.add"}}</span></button>
         </div>
         <div id="addExpenseContainer" hidden>
             {{template "expense-form" .}}

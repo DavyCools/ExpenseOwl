@@ -1,4 +1,5 @@
 import { formatMonth, getExpenses } from '../../shared/dates.js';
+import { t } from '../../shared/i18n.js';
 
 export function createTransactionControls(onChange) {
     const state = { currentDate: new Date(), timeRange: 'month', includeFuture: false };
@@ -60,8 +61,8 @@ export function createTransactionControls(onChange) {
         futureMessage() {
             if (state.includeFuture) return '';
             return visibility.hidden ?
-                ' Future transactions are hidden. Change the default in Settings to include them.' :
-                ' Future transactions are hidden. Enable "Future transactions" to show them.';
+                ' ' + t('controls.futureHiddenSettings') :
+                ' ' + t('controls.futureHidden');
         },
     };
 }

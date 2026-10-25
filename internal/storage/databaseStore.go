@@ -10,6 +10,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+
+	"github.com/DavyCools/expenseowl/internal/localization"
 )
 
 // databaseStore implements the Storage interface for PostgreSQL.
@@ -52,12 +54,14 @@ const (
 		currency VARCHAR(255) NOT NULL,
 		start_date INTEGER NOT NULL,
 		show_future_transactions BOOLEAN NOT NULL DEFAULT TRUE,
-		include_future_transactions BOOLEAN NOT NULL DEFAULT FALSE
+		include_future_transactions BOOLEAN NOT NULL DEFAULT FALSE,
+		language TEXT NOT NULL DEFAULT 'en'
 	);`
 	migrateFutureTransactionsSettingsSQL = `
 	ALTER TABLE config
 		ADD COLUMN IF NOT EXISTS show_future_transactions BOOLEAN NOT NULL DEFAULT TRUE,
 		ADD COLUMN IF NOT EXISTS include_future_transactions BOOLEAN NOT NULL DEFAULT FALSE;`
+	migrateLanguageSQL = `ALTER TABLE config ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'en';`
 )
 
 func InitializePostgresStore(baseConfig SystemConfig) (Storage, error) {
@@ -82,7 +86,7 @@ func makeDBURL(baseConfig SystemConfig) string {
 }
 
 func createTables(db *sql.DB) error {
-	for _, query := range []string{createExpensesTableSQL, createRecurringExpensesTableSQL, createConfigTableSQL, migrateFutureTransactionsSettingsSQL} {
+	for _, query := range []string{createExpensesTableSQL, createRecurringExpensesTableSQL, createConfigTableSQL, migrateFutureTransactionsSettingsSQL, migrateLanguageSQL} {
 		if _, err := db.Exec(query); err != nil {
 			return err
 		}
@@ -100,17 +104,18 @@ func (s *databaseStore) saveConfig(config *Config) error {
 		return fmt.Errorf("failed to marshal categories: %v", err)
 	}
 	query := `
-		INSERT INTO config (id, categories, currency, start_date, show_future_transactions, include_future_transactions)
-		VALUES ('default', $1, $2, $3, $4, $5)
+		INSERT INTO config (id, categories, currency, start_date, show_future_transactions, include_future_transactions, language)
+		VALUES ('default', $1, $2, $3, $4, $5, $6)
 		ON CONFLICT (id) DO UPDATE SET
 			categories = EXCLUDED.categories,
 			currency = EXCLUDED.currency,
 			start_date = EXCLUDED.start_date,
 			show_future_transactions = EXCLUDED.show_future_transactions,
-			include_future_transactions = EXCLUDED.include_future_transactions;
+			include_future_transactions = EXCLUDED.include_future_transactions,
+			language = EXCLUDED.language;
 	`
 	_, err = s.db.Exec(query, string(categoriesJSON), config.Currency, config.StartDate,
-		config.ShowFutureTransactions, config.IncludeFutureTransactions)
+		config.ShowFutureTransactions, config.IncludeFutureTransactions, config.Language)
 	s.defaults["currency"] = config.Currency
 	s.defaults["start_date"] = fmt.Sprintf("%d", config.StartDate)
 	return err
@@ -128,11 +133,11 @@ func (s *databaseStore) updateConfig(updater func(c *Config) error) error {
 }
 
 func (s *databaseStore) GetConfig() (*Config, error) {
-	query := `SELECT categories, currency, start_date, show_future_transactions, include_future_transactions FROM config WHERE id = 'default'`
-	var categoriesStr, currency string
+	query := `SELECT categories, currency, start_date, show_future_transactions, include_future_transactions, language FROM config WHERE id = 'default'`
+	var categoriesStr, currency, language string
 	var startDate int
 	var showSwitch, includeByDefault bool
-	err := s.db.QueryRow(query).Scan(&categoriesStr, &currency, &startDate, &showSwitch, &includeByDefault)
+	err := s.db.QueryRow(query).Scan(&categoriesStr, &currency, &startDate, &showSwitch, &includeByDefault, &language)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -147,6 +152,7 @@ func (s *databaseStore) GetConfig() (*Config, error) {
 	}
 
 	var config Config
+	config.Language = localization.Normalize(language)
 	config.Currency = currency
 	config.StartDate = startDate
 	config.ShowFutureTransactions = showSwitch
@@ -189,7 +195,7 @@ func (s *databaseStore) GetCurrency() (string, error) {
 
 func (s *databaseStore) UpdateCurrency(currency string) error {
 	if !slices.Contains(SupportedCurrencies, currency) {
-		return fmt.Errorf("invalid currency: %s", currency)
+		return localization.NewError("errors.currency", map[string]any{"currency": currency})
 	}
 	return s.updateConfig(func(c *Config) error {
 		c.Currency = currency
@@ -207,10 +213,21 @@ func (s *databaseStore) GetStartDate() (int, error) {
 
 func (s *databaseStore) UpdateStartDate(startDate int) error {
 	if startDate < 1 || startDate > 31 {
-		return fmt.Errorf("invalid start date: %d", startDate)
+		return localization.NewError("errors.startDate", map[string]any{"startDate": startDate})
 	}
+
 	return s.updateConfig(func(c *Config) error {
 		c.StartDate = startDate
+		return nil
+	})
+}
+
+func (s *databaseStore) UpdateLanguage(language string) error {
+	if !localization.Supported(language) {
+		return localization.NewError("errors.language", map[string]any{"language": language})
+	}
+	return s.updateConfig(func(c *Config) error {
+		c.Language = language
 		return nil
 	})
 }

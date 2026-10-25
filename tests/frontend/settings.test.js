@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
-import { browser, templates } from './helpers.js';
+import { browser, templates, locales } from './helpers.js';
 
 const settingsFragments = [
     'shared/layout.html',
@@ -55,13 +55,16 @@ test('settings composition preserves original paired rows and section ordering',
             /\{\{template "([^"]+)" [^}]+\}\}/g, (_, child) => compose(child)
         );
     }
-    const document = new app.window.DOMParser().parseFromString(compose('page-settings'), 'text/html');
+    const catalog = JSON.parse(await fs.readFile(path.join(locales, 'en.json'), 'utf8'));
+    const rendered = compose('page-settings').replace(/\{\{\.T "([^"]+)"\}\}/g, (_, key) => catalog.translation[key]);
+    const document = new app.window.DOMParser().parseFromString(rendered, 'text/html');
     assert.deepEqual(Array.from(document.querySelectorAll('h2'), heading => heading.textContent), [
         'Category Settings',
         'Currency Settings',
         'Start Date Settings',
         'Theme Settings',
         'Import/Export Data',
+        'Language',
         'Future Transactions',
         'Recurring Transactions',
     ]);
@@ -248,6 +251,7 @@ test('preferences preserve future keys, currency callback, start date and theme'
     const requests = [];
     let currency;
     app.window.fetch = async (url, options) => {
+        if (url === '/locales/') return { ok: true, json: async () => [{ code: 'en', name: 'English' }, { code: 'nl', name: 'Nederlands' }] };
         requests.push({ url, options });
         return { ok: true };
     };
@@ -280,6 +284,7 @@ test('page initializes, wires category updates and refreshes once after CSV impo
     app.window.fetch = async (url, options) => {
         requests.push({ url, options });
         const data = {
+            '/locales/': [{ code: 'en', name: 'English' }, { code: 'nl', name: 'Nederlands' }],
             '/config': config,
             '/expenses': [{ tags: ['personal'] }],
             '/recurring-expenses': [recurringExpense],

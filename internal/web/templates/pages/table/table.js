@@ -1,6 +1,9 @@
+import { initI18n, t } from '/shared/i18n.js';
 import { createTransactionControls } from '../../components/transaction-controls/transaction-controls.js';
 import { createExpenseForm } from '../../components/expense-form/expense-form.js';
 import { createTransactionTable } from '../../components/transaction-table/transaction-table.js';
+
+await initI18n();
 
 let config = null;
 let allExpenses = [];
@@ -19,7 +22,7 @@ const table = createTransactionTable({
         const expense = allExpenses.find(item => item.id === id);
         if (!expense) {
             console.error('Failed to load expense for editing:', id);
-            alert('Failed to load expense for editing. Please refresh and try again.');
+            alert(t('expense.editFailed'));
             return;
         }
         form.edit(expense);
@@ -49,7 +52,7 @@ async function initialize() {
         render();
     } catch (error) {
         console.error('Failed to initialize table:', error);
-        table.showError('Failed to load expenses');
+        table.showError(t('expense.loadFailed'));
     }
 }
 initialize();

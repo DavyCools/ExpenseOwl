@@ -1,6 +1,6 @@
 {{define "page-table"}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,11 +14,12 @@
     <link rel="stylesheet" href="/components/modal/modal.css">
     <link rel="stylesheet" href="/shared/overrides.css">
     <script src="/theme.js" defer></script>
-    <title>ExpenseOwl Table</title>
+    <title>{{.T "page.table"}}</title>
 </head>
 <body>
+    <p id="translationError" class="form-message error" hidden>{{.T "translations.loadFailed"}}</p>
     <div class="container">
-        {{template "navigation" "table"}}
+        {{template "navigation" (.ForPage "table")}}
         {{template "transaction-controls" .}}
         {{template "expense-form" .}}
         {{template "transaction-table" .}}

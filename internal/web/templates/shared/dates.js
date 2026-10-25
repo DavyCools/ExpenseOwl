@@ -1,9 +1,11 @@
+import { getLocale } from './i18n.js';
+
 export function getUserTimeZone() {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
 export function formatMonth(date) {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(getLocale(), {
         year: 'numeric',
         month: 'long',
         timeZone: getUserTimeZone()

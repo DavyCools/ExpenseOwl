@@ -7,13 +7,16 @@ import (
 	"net/http"
 
 	"github.com/DavyCools/expenseowl/internal/api"
+	"github.com/DavyCools/expenseowl/internal/localization"
 	"github.com/DavyCools/expenseowl/internal/storage"
-	"github.com/DavyCools/expenseowl/internal/web"
 )
 
 var version = "dev"
 
 func runServer(port int) {
+	if err := localization.Load(); err != nil {
+		log.Fatalf("Failed to load translations: %v", err)
+	}
 	storage, err := storage.InitializeStorage()
 	if err != nil {
 		log.Fatalf("Failed to initialize storage: %v", err)
@@ -24,7 +27,7 @@ func runServer(port int) {
 	// Version Handler
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			handler.HTTPError(w, "errors.method", http.StatusMethodNotAllowed)
 			return
 		}
 		w.Header().Set("Content-Type", "text/plain")
@@ -34,15 +37,10 @@ func runServer(port int) {
 	// UI Handlers
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
-			http.NotFound(w, r)
+			handler.HTTPError(w, "errors.notFound", http.StatusNotFound)
 			return
 		}
-		w.Header().Set("Content-Type", "text/html")
-		if err := web.ServeTemplate(w, "page-dashboard"); err != nil {
-			log.Printf("HTTP ERROR: Failed to serve template: %v", err)
-			http.Error(w, "Failed to serve template", http.StatusInternalServerError)
-			return
-		}
+		handler.ServePage(w, r, "page-dashboard")
 	})
 	http.HandleFunc("/table", handler.ServeTableView)
 	http.HandleFunc("/settings", handler.ServeSettingsPage)
@@ -59,6 +57,8 @@ func runServer(port int) {
 	http.HandleFunc("/pages/", handler.ServeStaticFile)
 	http.HandleFunc("/components/", handler.ServeStaticFile)
 	http.HandleFunc("/shared/", handler.ServeStaticFile)
+	http.HandleFunc("/vendor/", handler.ServeStaticFile)
+	http.HandleFunc("/locales/", handler.ServeLocales)
 
 	// Config
 	http.HandleFunc("/config", handler.GetConfig)
@@ -70,6 +70,7 @@ func runServer(port int) {
 	http.HandleFunc("/startdate", handler.GetStartDate)
 	http.HandleFunc("/startdate/edit", handler.UpdateStartDate)
 	http.HandleFunc("/future-transactions/edit", handler.UpdateFutureTransactionsSettings)
+	http.HandleFunc("/language/edit", handler.UpdateLanguage)
 	// http.HandleFunc("/tags", handler.GetTags)
 	// http.HandleFunc("/tags/edit", handler.UpdateTags)
 

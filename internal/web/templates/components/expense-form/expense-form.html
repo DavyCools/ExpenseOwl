@@ -2,42 +2,42 @@
         <div class="form-container">
             <form id="expenseForm" class="expense-form">
                 <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" value="-" required>
+                    <label for="name">{{.T "common.name"}}</label>
+                    <input type="text" id="name" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="category">Category</label>
+                    <label for="category">{{.T "common.category"}}</label>
                     <select id="category" required>
-                        <option value="">categories</option>
+                        <option value="">{{.T "common.categories"}}</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="tags-input">Tags</label>
+                    <label for="tags-input">{{.T "common.tags"}}</label>
                     <div id="tags-input-container" class="tags-input-container">
                         <div id="selected-tags" class="selected-tags"></div>
-                        <input type="text" id="tags-input" placeholder="(optional)">
+                        <input type="text" id="tags-input" placeholder="{{.T "common.optional"}}">
                     </div>
                     <div id="tags-dropdown" class="tags-dropdown"></div>
                 </div>
 
                 <div class="form-group">
-                    <label for="amount">Amount</label>
+                    <label for="amount">{{.T "common.amount"}}</label>
                     <input type="number" id="amount" step="0.01" min="0.01" max="9000000000000000" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="date">Date</label>
+                    <label for="date">{{.T "common.date"}}</label>
                     <input type="date" id="date" required>
                 </div>
 
                 <div class="form-group form-group-checkbox">
-                    <label for="reportGain">Report Gain</label>
+                    <label for="reportGain">{{.T "common.gain"}}</label>
                     <input type="checkbox" id="reportGain" class="styled-checkbox">
                 </div>
 
-                <button type="submit" class="nav-button">Add Expense</button>
+                <button type="submit" class="nav-button">{{.T "expense.add"}}</button>
             </form>
             <div id="formMessage" class="form-message"></div>
         </div>

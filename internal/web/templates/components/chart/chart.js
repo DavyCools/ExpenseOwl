@@ -1,3 +1,4 @@
+import { t } from '/shared/i18n.js';
 import { colorPalette, formatCurrency } from '/shared/currency.js';
 import { cloneTemplate } from '/shared/dom.js';
 
@@ -77,7 +78,7 @@ export function createChart() {
                                 const value = context.raw;
                                 const total = context.dataset.data.reduce((sum, amount) => sum + amount, 0);
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return `${context.label}: ${money(value)} (${percentage}%)`;
+                                return t('chart.tooltip', { category: context.label, amount: money(value), percentage });
                             }
                         }
                     }
@@ -191,7 +192,7 @@ export function createChart() {
                     categoryColors.set(category, colorPalette[index % colorPalette.length]);
                 }
             });
-            noDataMessage.textContent = 'No expenses recorded this time period.' + futureMessage;
+            noDataMessage.textContent = t('chart.empty') + futureMessage;
             update();
         },
         destroy() {

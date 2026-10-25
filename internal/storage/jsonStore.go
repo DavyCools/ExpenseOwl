@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/DavyCools/expenseowl/internal/localization"
 )
 
 // JSONStore implementats Storage interface - for JSON file storage
@@ -100,10 +102,12 @@ func (s *jsonStore) readConfigFile(path string) (*Config, error) {
 		return nil, err
 	}
 	var data Config
+	data.Language = "en"
 	data.ShowFutureTransactions = true
 	if err := json.Unmarshal(content, &data); err != nil {
 		return nil, err
 	}
+	data.Language = localization.Normalize(data.Language)
 	log.Println("Read config file")
 	return &data, nil
 }
@@ -162,7 +166,7 @@ func (s *jsonStore) GetCurrency() (string, error) {
 
 func (s *jsonStore) UpdateCurrency(currency string) error {
 	if !slices.Contains(SupportedCurrencies, currency) {
-		return fmt.Errorf("invalid currency: %s", currency)
+		return localization.NewError("errors.currency", map[string]any{"currency": currency})
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -185,8 +189,9 @@ func (s *jsonStore) GetStartDate() (int, error) {
 
 func (s *jsonStore) UpdateStartDate(startDate int) error {
 	if startDate < 1 || startDate > 31 {
-		return fmt.Errorf("invalid start date: %d", startDate)
+		return localization.NewError("errors.startDate", map[string]any{"startDate": startDate})
 	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	data, err := s.readConfigFile(s.configPath)
@@ -196,6 +201,20 @@ func (s *jsonStore) UpdateStartDate(startDate int) error {
 	data.StartDate = startDate
 	s.defaults["start_date"] = fmt.Sprintf("%d", startDate)
 	return s.writeConfigFile(s.configPath, data)
+}
+
+func (s *jsonStore) UpdateLanguage(language string) error {
+	if !localization.Supported(language) {
+		return localization.NewError("errors.language", map[string]any{"language": language})
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	config, err := s.readConfigFile(s.configPath)
+	if err != nil {
+		return err
+	}
+	config.Language = language
+	return s.writeConfigFile(s.configPath, config)
 }
 
 func (s *jsonStore) UpdateFutureTransactionsSettings(showSwitch, includeByDefault bool) error {

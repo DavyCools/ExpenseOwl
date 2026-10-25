@@ -35,7 +35,7 @@
 {{end}}
 
 {{define "settings-future"}}
-<section class="form-container">
+<section class="form-container half-width">
     <h2 align="center">{{.T "settings.future"}}</h2>
     <div class="future-transactions-settings">
         <label>
@@ -54,13 +54,13 @@
 {{end}}
 
 {{define "settings-language"}}
-<section class="form-container">
+<section class="form-container half-width">
     <h2 align="center">{{.T "settings.language"}}</h2>
     <div class="currency-selector">
         <select id="languageSelect" aria-label="{{.T "settings.language"}}" disabled></select>
         <button id="saveLanguage" class="nav-button" type="button" disabled>{{.T "common.save"}}</button>
     </div>
-    <p>{{.T "settings.languageHelp"}}</p>
+    <p class="form-help-text">{{.T "settings.languageHelp"}}</p>
     <div id="languageMessage" class="form-message"></div>
 </section>
 {{end}}

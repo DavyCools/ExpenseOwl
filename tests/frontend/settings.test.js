@@ -69,13 +69,14 @@ test('settings composition preserves original paired rows and section ordering',
         'Recurring Transactions',
     ]);
     const rows = document.querySelectorAll('.container > .settings-container');
-    assert.equal(rows.length, 2);
+    assert.equal(rows.length, 3);
     assert.deepEqual(Array.from(rows, row => Array.from(
         row.querySelectorAll(':scope > .form-container.half-width h2'), heading => heading.textContent
-    )), [['Currency Settings', 'Start Date Settings'], ['Theme Settings', 'Import/Export Data']]);
+    )), [['Currency Settings', 'Start Date Settings'], ['Theme Settings', 'Import/Export Data'], ['Language', 'Future Transactions']]);
     const future = document.getElementById('showFutureTransactions').closest('.form-container');
-    assert.equal(future.classList.contains('half-width'), false);
-    assert.equal(future.parentElement.className, 'container');
+    assert.equal(future.classList.contains('half-width'), true);
+    assert.equal(future.parentElement, document.getElementById('languageSelect').closest('.form-container').parentElement);
+    assert.equal(future.parentElement.className, 'settings-container');
 });
 
 test('recurring contract updates both category selects after add, rename, reorder and delete', async t => {

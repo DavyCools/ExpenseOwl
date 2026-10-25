@@ -10,7 +10,13 @@ permissions:
   packages: write
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+    permissions:
+      contents: read
+
   create-release:
+    needs: tests
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.new_version }}

@@ -138,6 +138,8 @@ npm ci
 npm test
 ```
 
+Pushing a `v*` tag runs these Go and frontend tests before creating a release or building/publishing release binaries and Docker images. Both tag-triggered workflows use the shared test workflow; a failed test blocks their downstream jobs.
+
 Frontend DOM tests live under [tests/frontend](tests/frontend) and use Node.js 22 or newer. Install dependencies from the repository root using [package.json](package.json): i18next is an application dependency, while jsdom is a test-only development dependency. Node/npm is not needed to run the app; the pinned i18next ES module is embedded alongside the frontend and imported directly without a global variable.
 
 ### Translations

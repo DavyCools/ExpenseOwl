@@ -1,0 +1,60 @@
+{{define "chart"}}
+<div class="chart-container">
+    <div id="noDataMessage" class="no-data" hidden>No expenses recorded this time period.</div>
+    <div class="chart-box">
+        <canvas id="categoryPieChart"></canvas>
+    </div>
+    <div class="legend-box" id="customLegend"></div>
+</div>
+<div id="cashflow-section" class="cashflow-container">
+    <div class="cashflow-item income">
+        <div class="cashflow-label">Income</div>
+        <div class="cashflow-value" id="cashflow-income"></div>
+    </div>
+    <div class="cashflow-item expenses">
+        <div class="cashflow-label">Expenses</div>
+        <div class="cashflow-value" id="cashflow-expenses"></div>
+    </div>
+    <div class="cashflow-item balance">
+        <div class="cashflow-label">Balance</div>
+        <div class="cashflow-value" id="cashflow-balance"></div>
+    </div>
+</div>
+<template id="chart-tags-toggle-template">
+    <div class="legend-tags-toggle">
+        <label><input type="checkbox">Show tags</label>
+    </div>
+</template>
+<template id="chart-category-template">
+    <div class="legend-item">
+        <div class="color-box"></div>
+        <div class="legend-text">
+            <span class="legend-category"></span>
+            <span class="amount"></span>
+        </div>
+    </div>
+</template>
+<template id="chart-tag-list-template">
+    <div class="legend-tag-list"></div>
+</template>
+<template id="chart-tag-template">
+    <div class="legend-tag-row">
+        <span class="legend-tag-name"></span>
+        <span class="amount"></span>
+    </div>
+</template>
+<template id="chart-total-template">
+    <div class="legend-total">
+        <div class="legend-total-row">
+            <span>Total:</span>
+            <span class="amount"></span>
+        </div>
+    </div>
+</template>
+<template id="chart-amount-template">
+    <span class="legend-amount amount">
+        <span class="legend-amount-breakdown" hidden>(<span class="legend-outgoing"></span> &bull; <span class="legend-incoming"></span>)</span>
+        <span class="legend-net"></span>
+    </span>
+</template>
+{{end}}

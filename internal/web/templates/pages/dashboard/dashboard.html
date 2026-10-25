@@ -1,0 +1,41 @@
+{{define "page-dashboard"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/fa.min.css">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="stylesheet" href="/shared/styles.css">
+    <link rel="stylesheet" href="/components/navigation/navigation.css">
+    <link rel="stylesheet" href="/components/transaction-controls/transaction-controls.css">
+    <link rel="stylesheet" href="/components/tags-input/tags-input.css">
+    <link rel="stylesheet" href="/components/expense-form/expense-form.css">
+    <link rel="stylesheet" href="/components/chart/chart.css">
+    <link rel="stylesheet" href="/shared/overrides.css">
+    <script src="/theme.js" defer></script>
+    <title>ExpenseOwl Dashboard</title>
+    <script src="/chart.min.js"></script>
+    <script type="module" src="/pages/dashboard/dashboard.js"></script>
+</head>
+<body>
+    <div class="container">
+        {{template "navigation" "dashboard"}}
+        {{template "transaction-controls" .}}
+        <div class="table-controls">
+            <button id="toggleExpenseFormBtn" class="nav-button"><i class="fa-solid fa-plus"></i> <span>Add Expense</span></button>
+        </div>
+        <div id="addExpenseContainer" hidden>
+            {{template "expense-form" .}}
+        </div>
+        {{template "chart" .}}
+    </div>
+    {{template "shared-templates" .}}
+    {{template "tags-templates" .}}
+</body>
+</html>
+{{end}}

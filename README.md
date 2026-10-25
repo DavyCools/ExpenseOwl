@@ -42,9 +42,12 @@
     - Click on a category to exclude it from the pie chart; click again to add it back
     - Visualize the month's breakdown without considering some categories like Rent
     - Cashflow shows total income, total expenses, and balance (red or green based on +ve or -ve)
+    - Category and tag amounts show net spending, with an expense/income breakdown when both are present; the legend includes income-only categories
+    - Pie slices use positive net spending; category percentages use gross expenses and tag percentages use the category's positive net spending
+    - Disabling a category removes it from pie slices and legend totals and dims its tags, while cashflow continues to show all selected transactions
 2. Table view for detailed expense listing
     - View monthly, yearly, or all expenses chronologically, edit them, and delete them (hold shift to skip confirm)
-    - Filter by name, category, tags, amount, or date
+    - Filter by name, category, tags, amount, or date; category and tag dropdowns support multiple selections with exact category matches and any selected tag
     - Tags show up if at least one transaction uses it; 
 3. Future transaction visibility
     - Chart and table views initially include transactions through today in your browser's local timezone
@@ -110,6 +113,30 @@ go build ./cmd/expenseowl
 This is a community-contributed Kubernetes spec. Treat it as a sample and review before deploying to your cluster. Read the [associated readme](./kubernetes/README.md) for more information.
 
 </details>
+
+# Development
+
+The frontend uses plain HTML, CSS, and JavaScript modules; no frontend build step is required.
+
+- [Page controllers](internal/web/templates/pages) compose the dashboard, table, and settings views.
+- [Components](internal/web/templates/components) keep related HTML templates, JavaScript behavior, and CSS together.
+- [Shared utilities](internal/web/templates/shared) contain date/currency helpers, DOM utilities, messages, and base styling.
+- Go composes the embedded HTML fragments before serving each page. Dynamic rows and lists clone HTML `<template>` elements and populate their values in JavaScript.
+- Third-party assets, the service worker, theme script, and icons retain their existing root paths.
+
+Run from the repository root with `go run ./cmd/expenseowl`. Since frontend assets are embedded in the binary, restart/rebuild after editing them.
+
+For automatic rebuilding, install [Air](https://github.com/air-verse/air) with `go install github.com/air-verse/air@latest`, then run `air -c .air.toml`. The configuration watches Go, HTML, JavaScript, CSS, and JSON files, excluding temporary builds, stored data, and tests. For automatic browser refresh, run `air -c .air.toml -proxy.enabled true -proxy.app_port 8080 -proxy.proxy_port 8090` and open `http://localhost:8090`.
+
+Tests live separately from application components:
+
+```powershell
+go test ./...
+npm --prefix tests\frontend ci
+npm --prefix tests\frontend test
+```
+
+Frontend DOM tests use Node.js 22 or newer and a dev-only dependency under [tests/frontend](tests/frontend); it is not embedded or needed to run the app.
 
 # Usage
 

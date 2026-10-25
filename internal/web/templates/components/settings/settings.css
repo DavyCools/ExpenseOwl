@@ -1,0 +1,274 @@
+.categories-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.category-item {
+    cursor: grab;
+}
+
+.category-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.category-item.drag-over {
+    border: 1px dashed var(--accent);
+    background-color: rgba(105, 175, 222, 0.1);
+}
+
+.category-item .drag-handle {
+    cursor: grab;
+    margin-right: 6px;
+    color: var(--text-secondary);
+}
+
+.category-handle-area {
+    display: flex;
+    align-items: center;
+}
+
+.placeholder {
+    border: 2px dashed var(--accent);
+    background-color: rgba(105, 175, 222, 0.1);
+    margin: 0.25rem 0;
+    height: 2px;
+    border-radius: 9999px;
+}
+
+.category-item {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.category-rename-input {
+    border: 1px solid var(--border);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.category-rename-input:focus {
+    border-color: var(--accent);
+}
+
+.category-item .delete-button,
+.category-item .edit-button,
+.category-item .save-rename-button,
+.category-item .cancel-rename-button {
+    padding: 0.25rem;
+    height: 1.5rem;
+    width: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.category-item .edit-button {
+    color: var(--accent);
+}
+
+.category-item .edit-button:hover {
+    background-color: rgba(105, 175, 222, 0.1);
+}
+
+.category-item .save-rename-button {
+    color: #4caf50;
+}
+
+.category-item .save-rename-button:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.category-item .cancel-rename-button {
+    color: #ff9800;
+}
+
+.category-item .cancel-rename-button:hover {
+    background-color: rgba(255, 152, 0, 0.1);
+}
+
+.category-item .delete-button {
+    color: #f44336;
+}
+
+.category-item .delete-button:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+.category-input-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.category-input-container input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.export-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.export-buttons a, .import-option label {
+    text-decoration: none;
+}
+
+.import-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.import-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.import-option {
+    flex: 1;
+}
+
+.import-option label {
+    /* display: block; */
+    text-align: center;
+    cursor: pointer;
+}
+
+.import-summary {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.import-progress {
+    margin-top: 0.5rem;
+    height: 4px;
+    background-color: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.import-progress-bar {
+    height: 100%;
+    background-color: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.settings-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.info-field {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.info-field a {
+    color: var(--text-primary);
+    text-decoration: underline;
+    cursor: pointer
+}
+
+.info-field a:hover {
+    transform: scale(1.1);
+}
+
+.info-field .separator {
+    color: var(--border);
+    margin: 0 0.5rem;
+}
+
+.currency-selector, .start-date-manager, .theme-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.start-date-manager input, .currency-selector select, .theme-selector select {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-width: 200px;
+}
+
+@media (max-width: 768px) {
+.export-buttons {
+        flex-direction: column;
+    }
+
+.import-options {
+        flex-direction: column;
+    }
+
+.settings-container {
+        flex-direction: column;
+    }
+
+}
+
+
+.future-transactions-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.future-transactions-settings label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.future-transactions-settings p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.import-option input[type="file"] {
+    display: none;
+}
+
+.recurring-expense-heading {
+    margin-top: 2rem;
+}

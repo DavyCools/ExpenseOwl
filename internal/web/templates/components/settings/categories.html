@@ -1,0 +1,39 @@
+{{define "settings-categories"}}
+<section class="form-container">
+    <h2 align="center">Category Settings</h2>
+    <div id="categories-manager">
+        <div id="categories-list" class="categories-list"></div>
+        <div class="category-input-container">
+            <input type="text" id="newCategory" placeholder="Add new category">
+            <button id="addCategory" class="nav-button" type="button">Add</button>
+        </div>
+        <button id="saveCategories" class="nav-button" type="button">Save Categories</button>
+        <div id="categoriesMessage" class="form-message"></div>
+    </div>
+</section>
+
+<template id="category-item-template">
+    <div class="category-item" draggable="true">
+        <div class="category-handle-area">
+            <span class="drag-handle"><i class="fa-solid fa-grip-lines"></i></span>
+            <span class="category-name"></span>
+            <input type="text" class="category-rename-input" hidden>
+        </div>
+        <div class="category-actions">
+            <button class="edit-button" type="button" data-action="rename" data-tooltip="Rename">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="save-rename-button" type="button" data-action="save-rename" data-tooltip="Save" hidden>
+                <i class="fa-solid fa-check"></i>
+            </button>
+            <button class="cancel-rename-button" type="button" data-action="cancel-rename" data-tooltip="Cancel" hidden>
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <button class="delete-button" type="button" data-action="delete" data-tooltip="Delete">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    </div>
+</template>
+<template id="category-placeholder-template"><div class="placeholder"></div></template>
+{{end}}

@@ -1,0 +1,54 @@
+{{define "settings-preferences"}}
+<div class="settings-container">
+    <section class="form-container half-width">
+        <h2 align="center">Currency Settings</h2>
+        <div class="currency-selector">
+            <select id="currencySelect"></select>
+            <button id="saveCurrency" class="nav-button" type="button">Save</button>
+        </div>
+        <div id="currencyMessage" class="form-message"></div>
+    </section>
+
+    <section class="form-container half-width">
+        <h2 align="center">Start Date Settings</h2>
+        <div class="start-date-manager">
+            <input type="number" id="startDate" min="1" max="31" placeholder="1">
+            <button id="saveStartDate" class="nav-button" type="button">Save</button>
+        </div>
+        <div id="startDateMessage" class="form-message"></div>
+    </section>
+</div>
+{{end}}
+
+{{define "settings-theme"}}
+<section class="form-container half-width">
+        <h2 align="center">Theme Settings</h2>
+        <div class="theme-selector">
+            <select id="themeSelect">
+                <option value="system">System Default</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <div id="themeMessage" class="form-message"></div>
+</section>
+{{end}}
+
+{{define "settings-future"}}
+<section class="form-container">
+    <h2 align="center">Future Transactions</h2>
+    <div class="future-transactions-settings">
+        <label>
+            <input type="checkbox" id="showFutureTransactions" disabled>
+            Show the future transactions switch on the chart and table
+        </label>
+        <label>
+            <input type="checkbox" id="includeFutureTransactions" disabled>
+            Include future transactions by default
+        </label>
+        <p>The default applies when opening the chart or table, even when the switch is hidden.</p>
+        <button id="saveFutureTransactionsSettings" class="nav-button" type="button" disabled>Save</button>
+    </div>
+    <div id="futureTransactionsMessage" class="form-message"></div>
+</section>
+{{end}}
